@@ -1,0 +1,83 @@
+
+@import 'tailwindcss';
+@import '../../vendor/tallstackui/tallstackui/css/v4.css';
+
+@source '../views';
+@source '../../vendor/tallstackui/tallstackui/**/*.php';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@plugin '@tailwindcss/forms';
+
+/* @theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+    --color-primary-50:  #eef6f6;
+--color-primary-100: #d6ebeb;
+--color-primary-200: #add7d8;
+--color-primary-300: #7fc0c3;
+--color-primary-400: #4fa6aa;
+--color-primary-500: #2f8c91;
+--color-primary-600: #267277;
+--color-primary-700: #1f5c60;
+--color-primary-800: #19494c;
+--color-primary-900: #153c3f;
+--color-primary-950: #0d2628; 
+} */
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* ── Primary: Azul royal formal ── */
+--color-primary-50:  #fffbeb;
+--color-primary-100: #fef3c7;
+--color-primary-200: #fde68a;
+--color-primary-300: #fcd34d;
+--color-primary-400: #fbbf24;
+--color-primary-500: #f59e0b;
+--color-primary-600: #d97706;
+--color-primary-700: #b45309;
+--color-primary-800: #92400e;
+--color-primary-900: #78350f;
+--color-primary-950: #451a03;
+/* --color-white-50:  #f8fafc;
+--color-white-100: #f1f5f9;
+--color-white-200: #e2e8f0;
+--color-white-300: #cbd5e1;
+--color-white-400: #94a3b8;
+--color-white-500: #64748b;
+--color-white-600: #475569;
+--color-white-700: #334155;
+--color-white-800: #1e293b;
+--color-white-900: #0f172a;
+--color-white-950: #020617;
+--color-white:#f8fafc; */
+    /* ── Secondary: Slate azulado ── */
+    --color-secondary-50:  #f8fafc;
+    --color-secondary-100: #f1f5f9;
+    --color-secondary-200: #e2e8f0;
+    --color-secondary-300: #cbd5e1;
+    --color-secondary-400: #94a3b8;
+    --color-secondary-500: #64748b;
+    --color-secondary-600: #475569;
+    --color-secondary-700: #334155;
+    --color-secondary-800: #1e293b;
+    --color-secondary-900: #0f172a;
+    --color-secondary-950: #020617;
+
+    /* ── Dark: Azul marino profundo ── */
+    --color-dark-50:  #f0f4f8;
+    --color-dark-100: #d9e2ec;
+    --color-dark-200: #bcccdc;
+    --color-dark-300: #9fb3c8;
+    --color-dark-400: #829ab1;
+    --color-dark-500: #627d98;
+    --color-dark-600: #486581;
+    --color-dark-700: #334e68;
+    --color-dark-800: #243b55;
+    --color-dark-900: #102a43;
+    --color-dark-950: #0a1929;
+}
+
+
