@@ -6,10 +6,12 @@ use Livewire\Component;
 
 class LiquidationForm extends Component
 {
-    public $id = 0, $ci, $supplier_id;
+    public $id = 0, $ci, $supplier_id, $customer_id;
     public
         $full_name,
-        $nim, $nit, $concession, $mine, $municipality, $name;
+        $nim, $nit, $concession, $mine, $municipality, $name, $contribution;
+    public $lote, $date, $lab_quimico, $number_lab, $codigo;
+    public $NIM = 0, $Zn = 0, $maquila = 0, $base = 0, $dm = 0, $AgUSD = 0, $agNIM = 0;
     public function render()
     {
         return view('livewire.liquidations.liquidation-form');
@@ -30,12 +32,13 @@ class LiquidationForm extends Component
     {
         $this->ci = $payload['ci'];
         $this->full_name = $payload['full_name'];
-        $this->supplier_id = $payload['id'];
+        $this->customer_id = $payload['id'];
         $this->nim = $payload['NIM'];
         $this->nit = $payload['NIT'];
         $this->concession = $payload['concession'];
         $this->mine = $payload['mine'];
         $this->municipality = $payload['municipality'];
         $this->name = $payload['name'];
+        $this->contribution = $payload['contribution'] ?? null;
     }
 }

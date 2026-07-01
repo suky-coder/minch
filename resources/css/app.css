@@ -29,31 +29,20 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
-    /* ── Primary: Azul royal formal ── */
---color-primary-50:  #fffbeb;
---color-primary-100: #fef3c7;
---color-primary-200: #fde68a;
---color-primary-300: #fcd34d;
---color-primary-400: #fbbf24;
---color-primary-500: #f59e0b;
---color-primary-600: #d97706;
---color-primary-700: #b45309;
---color-primary-800: #92400e;
---color-primary-900: #78350f;
---color-primary-950: #451a03;
-/* --color-white-50:  #f8fafc;
---color-white-100: #f1f5f9;
---color-white-200: #e2e8f0;
---color-white-300: #cbd5e1;
---color-white-400: #94a3b8;
---color-white-500: #64748b;
---color-white-600: #475569;
---color-white-700: #334155;
---color-white-800: #1e293b;
---color-white-900: #0f172a;
---color-white-950: #020617;
---color-white:#f8fafc; */
-    /* ── Secondary: Slate azulado ── */
+    /* ── Primary: Gold (Ayu Dark accent) ── */
+    --color-primary-50: #fef7ed;
+    --color-primary-100: #fdefd6;
+    --color-primary-200: #fbdfa8;
+    --color-primary-300: #f9cf7a;
+    --color-primary-400: #f0bf50;
+    --color-primary-500: #e6b450;
+    --color-primary-600: #d4a030;
+    --color-primary-700: #b38828;
+    --color-primary-800: #8c6d20;
+    --color-primary-900: #665218;
+    --color-primary-950: #403710;
+
+    /* ── Secondary: Slate ── */
     --color-secondary-50:  #f8fafc;
     --color-secondary-100: #f1f5f9;
     --color-secondary-200: #e2e8f0;
@@ -66,18 +55,46 @@
     --color-secondary-900: #0f172a;
     --color-secondary-950: #020617;
 
-    /* ── Dark: Azul marino profundo ── */
-    --color-dark-50:  #f0f4f8;
-    --color-dark-100: #d9e2ec;
-    --color-dark-200: #bcccdc;
-    --color-dark-300: #9fb3c8;
-    --color-dark-400: #829ab1;
-    --color-dark-500: #627d98;
-    --color-dark-600: #486581;
-    --color-dark-700: #334e68;
-    --color-dark-800: #243b55;
-    --color-dark-900: #102a43;
-    --color-dark-950: #0a1929;
+    /* ── Dark: Ayu Dark ── */
+    --color-dark-50:  #e8e7e4;
+    --color-dark-100: #d4d1cb;
+    --color-dark-200: #bfbdb6;
+    --color-dark-300: #8a8c8a;
+    --color-dark-400: #565b66;
+    --color-dark-500: #3d424d;
+    --color-dark-600: #2d3139;
+    --color-dark-700: #141821;
+    --color-dark-800: #0d1017;
+    --color-dark-900: #0b0e14;
+    --color-dark-950: #070a0f;
 }
 
+/* ── Scrollbar consistente ── */
+.overflow-y-auto, .overflow-auto, [class*="overflow-y-auto"],
+[class*="overflow-auto"], .soft-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-dark-300) transparent;
+}
+.overflow-y-auto::-webkit-scrollbar,
+.overflow-auto::-webkit-scrollbar,
+.soft-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.overflow-y-auto::-webkit-scrollbar-track,
+.overflow-auto::-webkit-scrollbar-track,
+.soft-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.overflow-y-auto::-webkit-scrollbar-thumb,
+.overflow-auto::-webkit-scrollbar-thumb,
+.soft-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--color-gray-400);
+  border-radius: 999px;
+}
+.dark .overflow-y-auto::-webkit-scrollbar-thumb,
+.dark .overflow-auto::-webkit-scrollbar-thumb,
+.dark .soft-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--color-dark-400);
+}
 

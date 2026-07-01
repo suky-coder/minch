@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Liquidations;
 
-use App\Models\Supplier;
+use App\Models\Customer;
 use Livewire\Attributes\Modelable;
 use Livewire\Component;
 
@@ -13,7 +13,7 @@ class SupplierCooperativeSearch extends Component
 
     public $searchTerm = '';
 
-    public $filteredSuppliers = [];
+    public $filteredCustomers = [];
 
     public $showList = false;
 
@@ -32,12 +32,12 @@ class SupplierCooperativeSearch extends Component
     {
         $search = trim($this->searchTerm);
         if (strlen($search) < 2) {
-            $this->filteredSuppliers = [];
+            $this->filteredCustomers = [];
 
             return;
         }
 
-        $this->filteredSuppliers = Supplier::query()
+        $this->filteredCustomers = Customer::query()
             ->with(['person', 'cooperative'])
             ->whereHas('person', function ($query) use ($search) {
                 $query->where('ci', 'LIKE', "%{$search}%")
@@ -51,28 +51,29 @@ class SupplierCooperativeSearch extends Component
             ->get();
     }
 
-    public function selectSupplier($id)
+    public function selectCustomer($id)
     {
-        $supplier = Supplier::with(['person', 'cooperative'])->find($id);
-        if (! $supplier) {
+        $customer = Customer::with(['person', 'cooperative'])->find($id);
+        if (! $customer) {
             return;
         }
 
-        $this->ci = $supplier->ci;
-        $this->searchTerm = $supplier->ci;
+        $this->ci = $customer->ci;
+        $this->searchTerm = $customer->ci;
         $this->showList = false;
 
         $this->dispatch('supplier-selected', [
-            'id' => $supplier->id,
-            'full_name' => $supplier->full_name,
-            'phone' => $supplier->phone,
-            'ci' => $supplier->ci,
-            'NIM' => $supplier->cooperative?->NIM,
-            'NIT' => $supplier->cooperative?->NIT,
-            'concession' => $supplier->cooperative?->concession,
-            'mine' => $supplier->cooperative?->mine,
-            'municipality' => $supplier->cooperative?->municipality,
-            'name' => $supplier->cooperative?->name,
+            'id' => $customer->id,
+            'full_name' => $customer->full_name,
+            'phone' => $customer->phone,
+            'ci' => $customer->ci,
+            'NIM' => $customer->cooperative?->NIM,
+            'NIT' => $customer->cooperative?->NIT,
+            'concession' => $customer->cooperative?->concession,
+            'mine' => $customer->cooperative?->mine,
+            'municipality' => $customer->cooperative?->municipality,
+            'name' => $customer->cooperative?->name,
+            'contribution' => $customer->cooperative?->contribution,
         ]);
     }
 

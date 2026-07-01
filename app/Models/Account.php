@@ -23,4 +23,9 @@ class Account extends Model
             'movement_id'
         );
     }
+
+    public function departaments()
+    {
+        return $this->hasMany(Departament::class);
+    }
 }

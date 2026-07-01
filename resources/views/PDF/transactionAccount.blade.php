@@ -277,7 +277,7 @@
                             {{ $transaction->description }}
                         </td>
                         <td>
-                            {{ $transaction->document }}
+                            {{ $transaction->transaction?->number_label ?? '' }}
                         </td>
                         <td>
                             {{ $transaction->type == 'D' ? $transaction->amount : ($transaction->type == 'B' ? $transaction->amount : '') }}

@@ -1,5 +1,10 @@
 <div class="space-y-4">
-    <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
+    <div class="flex items-center gap-2">
+        <x-button color="outline" icon="arrow-left" href="{{ route('transactions') }}" wire:navigate>
+            Volver
+        </x-button>
+    </div>
+        <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
         @can('Crear movimientos de libro de bancos')
             
         <x-button icon="clipboard-document-list" href="{{ route('transactions.form', [$this->date, $this->idAccount]) }}"
@@ -93,7 +98,7 @@
                     @foreach ($transactions as $transaction)
                         <tr class=" " wire:key="8b700ca168f875b5e2a3c9329ba84d55">
                             <td class="dark:text-dark-300 whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                {{ $loop->iteration }}
+                                {{ $transaction->transaction->formatted_last_number }}
                             </td>
                             <td class="dark:text-dark-300 whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                 {{ $transaction->date }}
@@ -102,33 +107,29 @@
                                 {{ $transaction->description }}
                             </td>
                             <td class="dark:text-dark-300 whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                {{ $transaction->transaction->formatted_last_number }}
+                                {{ $transaction->transaction->number_label }}
                             </td>
                             <td class="dark:text-dark-300 whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                {{ $transaction->type == 'D' ? $transaction->amount : ($transaction->type == 'B' ? $transaction->amount : '') }}
-
+                                {{ $transaction->type == 'D' ? number_format($transaction->amount, 2, '.', ',') : ($transaction->type == 'B' ? number_format($transaction->amount, 2, '.', ',') : '') }}
                             </td>
                             <td class="dark:text-dark-300 whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                {{ $transaction->type == 'C' ? $transaction->amount : '' }}
+                                {{ $transaction->type == 'C' ? number_format($transaction->amount, 2, '.', ',') : '' }}
                             </td>
                             <td class="dark:text-dark-300 whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                {{ $transaction->balance }}
+                                {{ number_format($transaction->balance, 2, '.', ',') }}
                             </td>
                             <td class="dark:text-dark-300 whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                 @if ($transaction->type != 'B')
                                     <div class="flex gap-1">
-                                        @can('Ver movimiento de libro de bancos ')
-                                            
+                                        {{-- @can('Ver movimiento de libro de bancos') --}}
                                         <x-button.circle icon="document" color="red" outline
                                         href="{{ route('receipt.transaction.pdf', $transaction->id) }}" />
-                                        @endcan
+                                       {{--  @endcan --}}
                                         @can('Editar movimientos de libro de bancos')
-                                            
                                         <x-button.circle icon="pencil" color="blue" light
                                         href="{{ route('transactions.form', [$this->date, $this->idAccount, $transaction->id]) }}" />
                                         @endcan
                                         @can('Eliminar movimientos de libro de bancos')
-                                            
                                         <x-button.circle icon="trash" color="red" light
                                         onclick="confirmDelete('{{ $transaction->id }}')" />
                                         @endcan
@@ -147,44 +148,4 @@
             {{ $transactions->links() }}
         </nav>
     </div>
-
-    <div x-on:close-modal.window="$tsui.close.modal('modal-id')">
-        <x-modal title="modal-id" id="modal-id" persistent>
-            <form id="user-create" wire:submit="save" class="space-y-2">
-                <div class="w-full ">
-                    <x-input label="Ingrese el monto" placeholder="Monto" wire:model="amount" />
-                </div>
-                <div class="w-full">
-                    <x-input label="DCTO. REF." placeholder="Nro de documento" wire:model="doc" />
-                </div>
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <div class="w-full sm:w-1/2">
-                        <x-select.styled label="Seleccione tipo" :options="[['label' => 'Debe', 'value' => 'D'], ['label' => 'Haber', 'value' => 'C']]" wire:model='type' />
-                    </div>
-                    <div class="w-full sm:w-1/2">
-                        <x-date label="Seleccione una fecha" wire:model="date" />
-                    </div>
-                </div>
-
-                <div class="w-full">
-                    <x-textarea wire:model="description" label="Descripción" rows="5" />
-                </div>
-            </form>
-            <x-slot:footer>
-                <x-button color="outline" type="button" wire:click="clear()">
-                    Cancelar
-                </x-button>
-                @if ($this->id)
-                    <x-button color="primary" wire:click="update()">
-                        Actualizar
-                    </x-button>
-                @else
-                    <x-button color="primary" wire:click="store()">
-                        Guardar
-                    </x-button>
-                @endif
-            </x-slot:footer>
-        </x-modal>
-    </div>
-
 </div>

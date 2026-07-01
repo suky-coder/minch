@@ -222,10 +222,10 @@
                             <td class="etiqueta">Se canceló a:</td>
                             <td class="valor">{{ $transaction->supplier->full_name }} </td>
                         </tr>
-                        @if ($transaction->number_check)
+                        @if ($transaction->transaction?->number_label)
                             <tr>
-                                <td class="etiqueta">Cheque Nro:</td>
-                                <td class="valor">{{ $transaction->number_check }} </td>
+                                <td class="etiqueta">Doc. Ref.:</td>
+                                <td class="valor">{{ $transaction->transaction->number_label }} </td>
                             </tr>
                         @endif
                         <tr>
@@ -235,7 +235,7 @@
                         <tr>
                             <td class="etiqueta" style="border-bottom:0px" >Por concepto:</td>
                             <td class="valor" style="font-size:12px; padding: 2px 0px 0px 0px; vertical-align: top; border-bottom:0px">
-                                    {{ str_pad(Str::limit($transaction->description, 570, '...'), 570, ' .') }}
+                                    {{ str_pad(Str::limit($transaction->description, 320, '...'), 320, ' .') }}
                             </td>
                         </tr>
 
@@ -279,7 +279,7 @@
                     <td rowspan="3" align="center" style="color: black"><strong
                             style="font-size:16px;color:black ">RECIBO DE
                             {{ $transaction->type == 'C' ? 'EGRESO' : 'INGRESO' }}</strong> <br> Nº
-                        {{ $transaction->formatted_last_number }} </td>
+                        {{ $transaction->transaction->formatted_last_number }} </td>
                     <td width="20%" style="border-top:0px;border-right:0px;padding: 0 0 0 10px"> Codigo:P12.F001</td>
                 </tr>
                 <tr>
@@ -306,10 +306,10 @@
                             <td class="etiqueta">Se canceló a:</td>
                             <td class="valor">{{ $transaction->supplier->full_name }} </td>
                         </tr>
-                        @if ($transaction->number_check)
+                        @if ($transaction->transaction?->number_label)
                             <tr>
-                                <td class="etiqueta">Cheque Nro:</td>
-                                <td class="valor">{{ $transaction->number_check }} </td>
+                                <td class="etiqueta">Doc. Ref.:</td>
+                                <td class="valor">{{ $transaction->transaction->number_label }} </td>
                             </tr>
                         @endif
                         <tr>
@@ -319,7 +319,7 @@
                         <tr>
                              <td class="etiqueta" style="border-bottom:0px" >Por concepto:</td>
                             <td class="valor" style="font-size:12px; padding: 2px 0px 0px 0px; vertical-align: top; border-bottom:0px">
-                                    {{ str_pad(Str::limit($transaction->description, 570, '...'), 570, ' .') }}
+                                    {{ str_pad(Str::limit($transaction->description, 320, '...'), 320, ' .') }}
                             </td>
                         </tr>
 
@@ -392,7 +392,7 @@
     <pagebreak sheet-size="180mm 76mm" />
     <div class="check-container">
         <div class="date">
-            <span style="margin-right: 5px">Potosí</span>
+            <span style="margin-right: 20px">Potosí</span>
             <span style="margin-right: 5px">06</span>
             <span style="margin-right: 5px">04</span>
             <span style="margin-right: 5px">2026</span>

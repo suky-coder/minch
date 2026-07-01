@@ -64,8 +64,7 @@
                 <tbody class="dark:bg-dark-700 dark:divide-dark-500/20 divide-y divide-gray-200 bg-white">
                     @forelse ($accountStatements as $movement)
                         @php
-                            $documentRef = $movement->document
-                                ?? $movement->box?->number_label
+                            $documentRef = $movement->box?->number_label
                                 ?? $movement->transaction?->number_label
                                 ?? '';
                             $isManual = ! $movement->box && ! $movement->transaction && $movement->type !== 'B';
@@ -86,29 +85,19 @@
                                 {{ number_format($movement->balance, 2, '.', ',') }}
                             </td>
                             <td class="px-3 py-4 text-sm text-gray-500">
-                                @if ($movement->type !== 'B')
+                              {{--   @if ($movement->type !== 'B' && $isManual) --}}
                                     <div class="flex gap-1">
-                                        @if ($movement->box)
-                                            <x-button.circle icon="document" color="red" outline
-                                                href="{{ route('receipt.box.pdf', $movement->id) }}" target="_blank" />
-                                        @elseif ($movement->transaction)
-                                            <x-button.circle icon="document" color="red" outline
-                                                href="{{ route('receipt.transaction.pdf', $movement->id) }}" target="_blank" />
-                                        @endif
-
-                                        @if ($isManual)
-                                            @can('Editar estados de cuenta')
-                                                <x-button.circle icon="pencil" color="blue" light
-                                                    wire:click="$dispatch('load::movement', { movement: {{ $movement->id }} })" />
-                                            @endcan
-                                            @can('Eliminar estados de cuenta')
-                                                <x-button.circle icon="trash" color="red" light
-                                                    wire:click="delete({{ $movement->id }})"
-                                                    wire:confirm="¿Está seguro de eliminar este movimiento?" />
-                                            @endcan
-                                        @endif
+                                       {{--  @can('Editar estados de cuenta') --}}
+                                            <x-button.circle icon="pencil" color="blue" light
+                                                wire:click="$dispatch('load::movement', { movement: {{ $movement->id }} })" />
+                                       {{--  @endcan
+                                        @can('Eliminar estados de cuenta') --}}
+                                            <x-button.circle icon="trash" color="red" light
+                                                wire:click="delete({{ $movement->id }})"
+                                                wire:confirm="¿Está seguro de eliminar este movimiento?" />
+                                        {{-- @endcan --}}
                                     </div>
-                                @endif
+                                {{-- @endif --}}
                             </td>
                         </tr>
                     @empty
@@ -135,7 +124,6 @@
             <form wire:submit.prevent="{{ $this->id ? 'update' : 'store' }}" class="space-y-2">
                 <x-input label="Monto" placeholder="Monto" wire:model="amount" />
                 <div class="flex flex-col sm:flex-row gap-4">
-                    <x-input label="Dcto. Ref." placeholder="Nro. de documento" wire:model="doc" />
                     <x-input label="Nº Volq." placeholder="Nro. de volqueta" wire:model="vol" />
                 </div>
                 <div class="flex flex-col sm:flex-row gap-4">

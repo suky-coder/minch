@@ -275,7 +275,7 @@
                             {{ $account->description }}
                         </td>
                         <td>
-                            {{ $account->document ?? ($account->box?->number_label ?? ($account->transaction?->number_label ?? '')) }}
+                            {{ $account->box?->number_label ?? ($account->transaction?->number_label ?? '') }}
                         </td>
                         <td>
                             {{ $account->number_vol }}

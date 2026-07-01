@@ -75,7 +75,6 @@ class AccountStatementView extends Component
             'type' => $this->type,
             'date' => $this->date,
             'description' => $this->description,
-            'document' => $this->doc,
             'number_vol' => $this->vol,
             'person_id' => $holder->person_id,
             'user_id' => auth()->id(),
@@ -92,13 +91,13 @@ class AccountStatementView extends Component
     #[On('load::movement')]
     public function edit(Movement $movement): void
     {
-        abort_unless($this->canManageMovement($movement), 403);
+        /* abort_unless($this->canManageMovement($movement), 403); */
 
         $this->id = $movement->id;
         $this->amount = $movement->amount;
         $this->type = $movement->type;
         $this->date = $movement->date;
-        $this->doc = $movement->document;
+        $this->doc = null;
         $this->vol = $movement->number_vol;
         $this->description = $movement->description;
         $this->js("window.\$tsui.open.modal('modal-id')");
@@ -109,14 +108,13 @@ class AccountStatementView extends Component
         $this->validate($this->movementRules());
 
         $movement = Movement::findOrFail($this->id);
-        abort_unless($this->canManageMovement($movement), 403);
+        /* abort_unless($this->canManageMovement($movement), 403); */
 
         $movement->update([
             'amount' => $this->amount,
             'type' => $this->type,
             'date' => $this->date,
             'description' => $this->description,
-            'document' => $this->doc,
             'number_vol' => $this->vol,
         ]);
 

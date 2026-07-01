@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Helpers\NumberHelper;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -14,7 +15,6 @@ class Movement extends Model
         'description',
         'type',
         'amount',
-        'document',
         'number_vol',
         'person_id',
         'user_id',
@@ -57,5 +57,13 @@ class Movement extends Model
         }
 
         return $this->person;
+    }
+    public function getdateLabelAttribute()
+    {
+        Carbon::setLocale('es');
+
+        $fecha = Carbon::parse($this->date);
+        $literal = $fecha->translatedFormat('d \d\\e F \d\\e Y');
+        return $literal;
     }
 }

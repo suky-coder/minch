@@ -20,7 +20,12 @@
                     <x-input label="Ingrese el monto" placeholder="Monto" wire:model="amount" />
                 </div>
                 <div class="w-full sm:w-1/2">
-                    <x-input label="Numero de cheque" placeholder="Nro de cheque" wire:model="number_check" />
+                    <x-select.styled label="Método de pago" :options="[['label' => 'Cheque', 'value' => 'CH'], ['label' => 'Transferencia', 'value' => 'T']]" wire:model='payment_type' />
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <div class="w-full sm:w-1/2">
+                    <x-input label="{{ $payment_type === 'T' ? 'Nro de transferencia' : 'Nro de cheque' }}" placeholder="{{ $payment_type === 'T' ? 'Nro de transferencia' : 'Nro de cheque' }}" wire:model="number_check" />
                 </div>
             </div>
             <div class="flex flex-col sm:flex-row gap-4">

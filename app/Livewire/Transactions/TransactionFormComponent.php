@@ -13,7 +13,7 @@ use Livewire\Component;
 
 class TransactionFormComponent extends Component
 {
-    public $id, $amount, $type, $date, $doc, $description, $number_check;
+    public $id, $amount, $type, $date, $doc, $description, $number_check, $payment_type = 'CH';
     public $ci, $full_name, $phone, $person_id;
     public $date_account, $account_id;
 
@@ -32,6 +32,7 @@ class TransactionFormComponent extends Component
                 $this->date = $movement->date;
                 $this->description = $movement->description;
                 $this->number_check = $movement->transaction?->number_check;
+                $this->payment_type = $movement->transaction?->payment_type ?? 'CH';
                 $this->doc = $movement->transaction?->number_check;
 
                 if ($movement->person) {
@@ -92,6 +93,7 @@ class TransactionFormComponent extends Component
 
             $movement->transaction()->create([
                 'account_id' => $this->account_id,
+                'payment_type' => $this->payment_type,
                 'number_check' => $this->number_check ?: null,
             ]);
 
@@ -123,6 +125,7 @@ class TransactionFormComponent extends Component
 
             $movement->transaction()->update([
                 'account_id' => $this->account_id,
+                'payment_type' => $this->payment_type,
                 'number_check' => $this->number_check ?: null,
             ]);
 
@@ -146,12 +149,13 @@ class TransactionFormComponent extends Component
             'date' => 'required|date',
             'description' => 'required|string|max:255',
             'number_check' => 'nullable|string|max:20',
+            'payment_type' => 'required|in:CH,T',
         ];
     }
 
     public function clear()
     {
-        $this->reset(['ci', 'full_name', 'phone', 'amount', 'type', 'date', 'description', 'number_check', 'id', 'person_id']);
+        $this->reset(['ci', 'full_name', 'phone', 'amount', 'type', 'date', 'description', 'number_check', 'id', 'person_id', 'payment_type']);
         $this->resetValidation();
         $this->dispatch('close-modal');
     }

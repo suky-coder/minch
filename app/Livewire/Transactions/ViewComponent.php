@@ -17,7 +17,7 @@ class ViewComponent extends Component
     use Interactions;
 
     public $start, $end, $dateT, $account, $moneda;
-    public $idAccount, $amount, $id, $type, $date, $doc, $description;
+    public $idAccount, $amount, $id, $type, $date, $doc, $description, $payment_type;
     public $person_id; // <-- Nuevo campo para el proveedor
 
     public function mount($id, $date)
@@ -44,9 +44,10 @@ class ViewComponent extends Component
             $query->where('account_id', $this->idAccount);
         }, 'person']) // Cargar la persona relacionada
         ->whereBetween('date', [$this->start, $this->end])
-        ->orderBy('date', 'asc')
+        ->orderBy('date')
+        ->orderBy('id')
         ->select('*')
-        ->selectRaw('SUM(CASE WHEN type IN ("D", "B") THEN amount ELSE -amount END) OVER (ORDER BY date) as balance')
+        ->selectRaw('SUM(CASE WHEN type IN ("D", "B") THEN amount ELSE -amount END) OVER (ORDER BY date, id) as balance')
         ->paginate(10);
 
         // Obtener lista de proveedores para el selector (todos los que tienen persona)
@@ -64,9 +65,10 @@ class ViewComponent extends Component
         $this->amount = $movement->amount;
         $this->type = $movement->type;
         $this->date = $movement->date;
-        $this->doc = $transaction->number_check; // Asumo que es el campo de referencia
+        $this->doc = $transaction->number_check;
+        $this->payment_type = $transaction->payment_type;
         $this->description = $movement->description;
-        $this->person_id = $movement->person_id; // Cargar el proveedor asociado
+        $this->person_id = $movement->person_id;
 
         $this->js("window.\$tsui.open.modal('modal-id')");
     }
@@ -96,6 +98,7 @@ class ViewComponent extends Component
 
         // Actualizar la transacción (si tiene número de cheque)
         $transaction->update([
+            'payment_type' => $this->payment_type,
             'number_check' => $this->doc,
         ]);
 
@@ -124,7 +127,7 @@ class ViewComponent extends Component
 
     public function clear()
     {
-        $this->reset(['id', 'amount', 'type', 'date', 'doc', 'description', 'person_id']);
+        $this->reset(['id', 'amount', 'type', 'date', 'doc', 'description', 'person_id', 'payment_type']);
         $this->resetValidation();
         $this->dispatch('close-modal');
     }

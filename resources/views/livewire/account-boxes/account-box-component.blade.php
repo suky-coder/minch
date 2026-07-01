@@ -1,17 +1,23 @@
 <div class="space-y-4">
-    <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
-        <x-button href="{{ route('accounts.box.form') }}" icon="clipboard-document-list" class="w-full sm:w-auto">
-            Agregar movimientoa
+    <div class="flex items-center gap-2">
+        <x-button color="outline" icon="arrow-left" href="{{ route('accounts') }}" wire:navigate>
+            Volver
         </x-button>
-
     </div>
-    <div class="flex flex-col sm:flex-row gap-4 sm:justify-end sm:items-end">
-        <x-button color="red" icon="document-arrow-down"  href="{{ route('account.box.pdf') }}" target="_back">
-            Descargar pdf
-        </x-button>
-        <x-button href="" icon="document-arrow-up" color="emerald" outline class="w-full sm:w-auto">
-            Descargar excel
-        </x-button>
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div class="flex gap-2">
+            <x-date month-year-only wire:model="selectedDate" />
+            <x-button color="sky" icon="magnifying-glass-circle" outline wire:click="$refresh">Consultar</x-button>
+        </div>
+        <div class="flex gap-2">
+            <x-button href="{{ route('accounts.box.form', ['date_account' => $selectedDate . '-01']) }}" icon="clipboard-document-list">
+                Agregar movimiento
+            </x-button>
+            <x-button color="red" icon="document-arrow-down" href="{{ route('account.box.pdf') }}" target="_blank">
+                Descargar PDF
+            </x-button>
+        </div>
     </div>
 
     <div class="overflow-hidden dark:ring-dark-600 rounded-lg shadow ring-1 ring-gray-300">
@@ -64,7 +70,7 @@
                     @foreach ($movements as $movement)
                         <tr class=" " wire:key="8b700ca168f875b5e2a3c9329ba84d55">
                             <td class="dark:text-dark-300 whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                {{ $loop->iteration }}
+                                {{ $movement->type == 'B' ? '' : ($movement->box?->number_label ?? '') }}
                             </td>
                             <td class="dark:text-dark-300 whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                 {{ $movement->date }}
@@ -73,14 +79,13 @@
                                 {{ $movement->description }}
                             </td>
                             <td class="dark:text-dark-300 whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                {{ $movement->type == 'D' ? $movement->amount : ($movement->type == 'B' ? $movement->amount : '') }}
-
+                                {{ $movement->type == 'D' ? number_format($movement->amount, 2, '.', ',') : ($movement->type == 'B' ? number_format($movement->amount, 2, '.', ',') : '') }}
                             </td>
                             <td class="dark:text-dark-300 whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                {{ $movement->type == 'C' ? $movement->amount : '' }}
+                                {{ $movement->type == 'C' ? number_format($movement->amount, 2, '.', ',') : '' }}
                             </td>
                             <td class="dark:text-dark-300 whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                {{ $movement->balance }}
+                                {{ number_format($movement->balance, 2, '.', ',') }}
                             </td>
                             <td class="dark:text-dark-300 whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                 @if ($movement->type != 'B')

@@ -62,12 +62,16 @@ class AccountStatementComponent extends Component
             ->withQueryString();
 
         $rows = $records->through(function ($record) {
+            $service = app(AccountStatementService::class);
+            $totals = $service->totalsForPerson($record->person_id);
+
             return (object) [
                 'id' => $record->id,
                 'full_name' => $record->person->full_name ?? '',
                 'phone' => $record->person->phone ?? '',
                 'ci' => $record->person->ci ?? '',
                 'file' => $record->file,
+                'balance' => $totals['balance'],
                 'model' => $record,
             ];
         });
@@ -76,8 +80,8 @@ class AccountStatementComponent extends Component
             'headers' => [
                 ['index' => 'id', 'label' => '#'],
                 ['index' => 'full_name', 'label' => 'Nombre Completo'],
-                ['index' => 'phone', 'label' => 'Teléfono'],
                 ['index' => 'ci', 'label' => 'Cédula de Identidad'],
+                ['index' => 'balance', 'label' => 'Saldo'],
                 ['index' => 'action', 'label' => 'Operaciones'],
             ],
             'rows' => $rows,

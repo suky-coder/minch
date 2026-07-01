@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
+            $table->enum('payment_type', ['CH', 'T'])->default('CH');
             $table->unsignedBigInteger('number');
             $table->string('number_check',20)->nullable();   
             $table->unsignedBigInteger('account_id');

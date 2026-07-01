@@ -55,10 +55,6 @@ class AccountStatementService
 
     public function documentReference(Movement $movement): string
     {
-        if ($movement->document) {
-            return $movement->document;
-        }
-
         if ($movement->box) {
             return $movement->box->number_label;
         }

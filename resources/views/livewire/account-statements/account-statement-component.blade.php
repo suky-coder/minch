@@ -7,55 +7,32 @@
                 Proveedores
             </button>
             <button type="button"
-                wire:click="$set('this->activeTab', 'customer')"
+                wire:click="$set('activeTab', 'customer')"
                 class="px-4 py-2 text-sm font-medium rounded-md transition {{ $this->activeTab === 'customer' ? 'bg-primary-500 text-white' : 'text-gray-600 dark:text-gray-300' }}">
                 Clientes
             </button>
         </div>
-
-        @can('Crear estados de cuenta')
-            <x-button icon="clipboard-document-list" x-on:click="$tsui.open.modal('modal-id')" class="w-full sm:w-auto">
-                Agregar {{ $holderLabel }}
-            </x-button>
-        @endcan
     </div>
 
     <div>
         <x-table :$headers :$rows filter paginate loading id="account-statements">
+            @interact('column_balance', $row)
+                @php
+                    $balance = (float) $row->balance;
+                @endphp
+                <x-badge :color="$balance < 0 ? 'red' : 'emerald'" size="sm">
+                    {{ number_format($balance, 2, '.', ',') }}
+                </x-badge>
+            @endinteract
             @interact('column_action', $row)
                 <div class="flex gap-1 flex-row justify-center">
-                    @if ($row->file)
-                        @php
-                            $filePath = $this->activeTab === 'customer'
-                                ? 'customers/contract/' . $row->file
-                                : 'suppliers/contract/' . $row->file;
-                        @endphp
-                        <x-button.circle icon="document" color="red" outline
-                            href="{{ Storage::url($filePath) }}" target="_blank" />
-                    @endif
                     @can('Ver estados de cuenta')
                         <x-button.circle icon="eye" color="violet" light
                             href="{{ route('accounts.statement.view', ['type' => $this->activeTab, 'id' => $row->id]) }}"
                             wire:navigate />
                     @endcan
-                    @can('Editar estados de cuenta')
-                        @if ($this->activeTab === 'supplier')
-                            <x-button.circle icon="pencil" color="blue" light
-                                wire:click="$dispatch('load::supplier', { supplier: {{ $row->id }} })" />
-                        @else
-                            <x-button.circle icon="pencil" color="blue" light
-                                wire:click="$dispatch('load::customer', { customer: {{ $row->id }} })" />
-                        @endif
-                    @endcan
-                    @can('Eliminar estados de cuenta')
-                        <x-button.circle icon="trash" color="red" light
-                            wire:click="delete{{ ucfirst($this->activeTab) }}({{ $row->id }})"
-                            wire:confirm="¿Está seguro de eliminar este registro?" />
-                    @endcan
                 </div>
             @endinteract
         </x-table>
     </div>
-
-    @include('livewire.account-statements.form')
 </div>

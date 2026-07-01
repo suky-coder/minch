@@ -4,6 +4,7 @@ namespace App\Livewire\AccountBoxes;
 
 
 use App\Models\Movement;
+use App\Services\CashBalanceService;
 use App\Services\PersonSupplierService;
 use App\Models\Box;
 use Carbon\Carbon;
@@ -32,8 +33,7 @@ class BoxFormComponent extends Component
                 $this->date = $movement->date;
                 $this->description = $movement->description;
                 
-                // Cargar número de referencia (documento) si existe
-                $this->number_check = $movement->document ?? null;
+                $this->number_check = null;
 
                 if ($movement->person) {
                     $this->ci = $movement->person->ci;
@@ -99,10 +99,11 @@ class BoxFormComponent extends Component
                 'amount'      => $this->amount,
                 'person_id'   => $supplier->person_id,
                 'user_id'     => auth()->id(),
-                'document'    => $this->number_check,
             ]);
 
             $movement->box()->create([]);
+
+            app(CashBalanceService::class)->recalculateFromDate($movement->date);
         });
 
         return redirect()->route('accounts.box', [
@@ -139,8 +140,9 @@ class BoxFormComponent extends Component
                 'type'        => $this->type,
                 'amount'      => $this->amount,
                 'person_id'   => $supplier->person_id,
-                'document'    => $this->number_check,
             ]);
+
+            app(CashBalanceService::class)->recalculateFromDate($this->date);
         });
 
         return redirect()->route('accounts.box', [

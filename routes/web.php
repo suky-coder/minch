@@ -14,6 +14,8 @@ use App\Livewire\Permissions\PermissionComponent;
 use App\Livewire\Retentions\RetentionComponent;
 use App\Livewire\Retentions\RetentionComponentForm;
 use App\Livewire\Roles\RoleComponent;
+use App\Livewire\Customers\CustomerComponent;
+use App\Livewire\Departaments\DepartamentComponent;
 use App\Livewire\Suppliers\SupplierComponent;
 use App\Livewire\Taxe\TaxeComponent;
 use App\Livewire\Transactions\TransactionComponent;
@@ -68,6 +70,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::get('suppliers', SupplierComponent::class)->name('suppliers');
+    Route::get('customers', CustomerComponent::class)->name('customers');
+    Route::get('departments', DepartamentComponent::class)->name('departments');
     Route::get('cooperatives', CooperativeComponent::class)->name('cooperatives');
     Route::get('liquidations/form', LiquidationForm::class)->name('liquidation.form');
 

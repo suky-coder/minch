@@ -12,6 +12,36 @@ class MovementBalanceService
         $modifiedMonth = Carbon::parse($date)->startOfMonth();
         $nextMonth = $modifiedMonth->copy()->addMonth()->startOfMonth();
 
+        $lastBalance = Movement::query()
+            ->join('transactions', 'movements.id', '=', 'transactions.movement_id')
+            ->where('transactions.account_id', $accountId)
+            ->where('movements.type', 'B')
+            ->where('movements.date', '<', $modifiedMonth)
+            ->orderBy('movements.date', 'desc')
+            ->select('movements.*')
+            ->first();
+
+        if ($lastBalance) {
+            $cursor = Carbon::parse($lastBalance->date)->startOfMonth()->addMonth();
+
+            while ($cursor < $modifiedMonth) {
+                $this->upsertBalanceMovement(
+                    $accountId,
+                    $cursor->copy(),
+                    $cursor->copy()->subMonth()->startOfMonth(),
+                    $cursor->copy()->subMonth()->endOfMonth()
+                );
+                $cursor->addMonth();
+            }
+        }
+
+        $this->upsertBalanceMovement(
+            $accountId,
+            $modifiedMonth,
+            $modifiedMonth->copy()->subMonth()->startOfMonth(),
+            $modifiedMonth->copy()->subMonth()->endOfMonth()
+        );
+
         $this->upsertBalanceMovement(
             $accountId,
             $nextMonth,
@@ -84,6 +114,13 @@ class MovementBalanceService
 
     private function calculateMonthBalance(int $accountId, Carbon $from, Carbon $to): float
     {
+        $hasBalanceInRange = Movement::query()
+            ->join('transactions', 'movements.id', '=', 'transactions.movement_id')
+            ->where('transactions.account_id', $accountId)
+            ->where('movements.type', 'B')
+            ->whereBetween('movements.date', [$from, $to])
+            ->exists();
+
         $totalDebit = Movement::query()
             ->join('transactions', 'movements.id', '=', 'transactions.movement_id')
             ->where('transactions.account_id', $accountId)
@@ -98,6 +135,22 @@ class MovementBalanceService
             ->whereBetween('movements.date', [$from, $to])
             ->sum('movements.amount');
 
-        return (float) ($totalDebit - $totalCredit);
+        $balance = (float) ($totalDebit - $totalCredit);
+
+        if (!$hasBalanceInRange) {
+            $previousBalance = Movement::query()
+                ->join('transactions', 'movements.id', '=', 'transactions.movement_id')
+                ->where('transactions.account_id', $accountId)
+                ->where('movements.type', 'B')
+                ->where('movements.date', '<', $from)
+                ->orderBy('movements.date', 'desc')
+                ->value('movements.amount');
+
+            if ($previousBalance) {
+                $balance += (float) $previousBalance;
+            }
+        }
+
+        return $balance;
     }
 }
