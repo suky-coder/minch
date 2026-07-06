@@ -6,16 +6,67 @@ use Livewire\Component;
 
 class LiquidationForm extends Component
 {
-    public $id = 0, $ci, $supplier_id, $customer_id;
-    public
-        $full_name,
-        $nim, $nit, $concession, $mine, $municipality, $name, $contribution;
-    public $lote, $date, $lab_quimico, $number_lab, $codigo;
-    public $NIM = 0, $Zn = 0, $maquila = 0, $base = 0, $dm = 0, $AgUSD = 0, $agNIM = 0;
+    public $id = 0;
+
+    public $metal = 'zn';
+
+    public $ci;
+
+    public $supplier_id;
+
+    public $customer_id;
+
+    public $full_name;
+
+    public $nim;
+
+    public $nit;
+
+    public $concession;
+
+    public $mine;
+
+    public $municipality;
+
+    public $name;
+
+    public $contribution;
+
+    public $lote;
+
+    public $date;
+
+    public $lab_quimico;
+
+    public $number_lab;
+
+    public $codigo;
+
+    public $NIM = 0;
+
+    public $Zn = 0;
+
+    public $nimPb = 0;
+
+    public $Pb = 0;
+
+    public $refinacion = 0;
+
+    public $maquila = 0;
+
+    public $base = 0;
+
+    public $dm = 0;
+
+    public $AgUSD = 0;
+
+    public $agNIM = 0;
+
     public function render()
     {
         return view('livewire.liquidations.liquidation-form');
     }
+
     protected function getListeners()
     {
         return [
@@ -23,11 +74,13 @@ class LiquidationForm extends Component
             'supplier-ci-manual' => 'onSupplierCiManual',
         ];
     }
+
     public function onSupplierCiManual($payload)
     {
         $this->ci = $payload['ci'];
         $this->supplier_id = null;
     }
+
     public function onSupplierSelected($payload)
     {
         $this->ci = $payload['ci'];

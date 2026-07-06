@@ -2,20 +2,41 @@
 
 namespace App\Livewire\Transactions;
 
-use App\Models\Account;
 use App\Models\Movement;
-use App\Models\Transaction;
 use App\Services\MovementBalanceService;
 use App\Services\PersonSupplierService;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class TransactionFormComponent extends Component
 {
-    public $id, $amount, $type, $date, $doc, $description, $number_check, $payment_type = 'CH';
-    public $ci, $full_name, $phone, $person_id;
-    public $date_account, $account_id;
+    public $id;
+
+    public $amount;
+
+    public $type;
+
+    public $date;
+
+    public $doc;
+
+    public $description;
+
+    public $number_check;
+
+    public $payment_type = 'CH';
+
+    public $ci;
+
+    public $full_name;
+
+    public $phone;
+
+    public $person_id;
+
+    public $date_account;
+
+    public $account_id;
 
     public function mount($date_account, $account_id, $id = 0)
     {

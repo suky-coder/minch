@@ -5,6 +5,7 @@ namespace App\Helpers;
 use App\Models\Movement;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+
 // app/Traits/HasConsecutiveNumber.php
 // app/Traits/HasConsecutiveNumber.php
 
@@ -28,7 +29,7 @@ trait HasConsecutiveNumber
             $hasta = Carbon::parse($fecha)->endOfMonth();
 
             $query = DB::table(static::tablaDetalle())
-                ->join('movements', 'movements.id', '=', static::tablaDetalle() . '.movement_id')
+                ->join('movements', 'movements.id', '=', static::tablaDetalle().'.movement_id')
                 ->whereIn('movements.type', ['D', 'C'])
                 ->whereBetween('movements.date', [$desde, $hasta])
                 ->lockForUpdate();
@@ -38,7 +39,7 @@ trait HasConsecutiveNumber
                 $query->where('transactions.account_id', $model->account_id);
             }
 
-            $max = $query->max(static::tablaDetalle() . '.number');
+            $max = $query->max(static::tablaDetalle().'.number');
 
             return ($max ?? 0) + 1;
         });

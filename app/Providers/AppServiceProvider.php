@@ -116,7 +116,7 @@ class AppServiceProvider extends ServiceProvider
 
             ->sideBar('separator')
             ->block('line.border', 'border-primary-100 dark:border-dark-700 w-full border-t')
-            ->block('line.base', 'dark:bg-dark-800 text-primary-600 dark:text-dark-300 bg-white px-3 text-base font-semibold whitespace-nowrap overflow-hidden transition-all duration-150')
+            ->block('line.base', 'dark:bg-dark-800 text-gray-500 dark:text-dark-300 bg-white px-3 text-xs font-semibold uppercase tracking-wider whitespace-nowrap overflow-hidden transition-all duration-150')
             ->and()
 
             ->layout('header')

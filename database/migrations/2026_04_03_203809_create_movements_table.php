@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->date('date');
             $table->text('description');
-            $table->enum('type',['D','C','B']);
-            $table->decimal('amount',9,2);
+            $table->enum('type', ['D', 'C', 'B']);
+            $table->decimal('amount', 9, 2);
             $table->string('number_vol', 20)->nullable();
             $table->unsignedBigInteger('person_id')->nullable()->default(null);
             $table->unsignedBigInteger('user_id')->nullable()->default(null);

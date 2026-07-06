@@ -100,7 +100,7 @@ class AccountStatementView extends Component
         $this->doc = null;
         $this->vol = $movement->number_vol;
         $this->description = $movement->description;
-        $this->js("window.\$tsui.open.modal('modal-id')");
+        $this->js("window.\$tsui.open.modal('crud-modal')");
     }
 
     public function update(): void

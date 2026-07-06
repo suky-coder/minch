@@ -29,15 +29,15 @@
             </div>
         </form>
         <x-slot:footer>
-            <x-button color="outline" type="button" wire:click="clear()">
+            <x-button color="outline" type="button" wire:click="clear()" icon="x-mark">
                 Cancelar
             </x-button>
             @if ($this->id)
-                <x-button color="primary" wire:click="update()">
+                <x-button color="primary" wire:click="update()" icon="check">
                     Actualizar
                 </x-button>
             @else
-                <x-button color="primary" wire:click="store()">
+                <x-button color="primary" wire:click="store()" icon="check">
                     Guardar
                 </x-button>
             @endif

@@ -2,11 +2,9 @@
 
 namespace App\Livewire\AccountBoxes;
 
-
 use App\Models\Movement;
 use App\Services\CashBalanceService;
 use App\Services\PersonSupplierService;
-use App\Models\Box;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -14,9 +12,28 @@ use Livewire\Component;
 class BoxFormComponent extends Component
 {
     public $id;
-    public $amount, $type, $date, $description, $number_check;
-    public $ci, $full_name, $person_id, $phone;
-    public $date_account, $account_id;
+
+    public $amount;
+
+    public $type;
+
+    public $date;
+
+    public $description;
+
+    public $number_check;
+
+    public $ci;
+
+    public $full_name;
+
+    public $person_id;
+
+    public $phone;
+
+    public $date_account;
+
+    public $account_id;
 
     public function mount($date_account = null, $account_id = null, $id = 0)
     {
@@ -32,7 +49,7 @@ class BoxFormComponent extends Component
                 $this->type = $movement->type;
                 $this->date = $movement->date;
                 $this->description = $movement->description;
-                
+
                 $this->number_check = null;
 
                 if ($movement->person) {
@@ -74,6 +91,8 @@ class BoxFormComponent extends Component
 
     public function store()
     {
+        $this->authorize('Crear caja chica');
+
         $this->validate([
             'ci' => 'required|string|max:15',
             'full_name' => 'required|string|max:150',
@@ -93,12 +112,12 @@ class BoxFormComponent extends Component
             );
 
             $movement = Movement::create([
-                'date'        => $this->date,
+                'date' => $this->date,
                 'description' => $this->description,
-                'type'        => $this->type,
-                'amount'      => $this->amount,
-                'person_id'   => $supplier->person_id,
-                'user_id'     => auth()->id(),
+                'type' => $this->type,
+                'amount' => $this->amount,
+                'person_id' => $supplier->person_id,
+                'user_id' => auth()->id(),
             ]);
 
             $movement->box()->create([]);
@@ -108,12 +127,14 @@ class BoxFormComponent extends Component
 
         return redirect()->route('accounts.box', [
             'date' => $this->date_account,
-            'id'   => $this->account_id
+            'id' => $this->account_id,
         ]);
     }
 
     public function update()
     {
+        $this->authorize('Editar caja chica');
+
         $this->validate([
             'ci' => 'required|string|max:15',
             'full_name' => 'required|string|max:150',
@@ -135,11 +156,11 @@ class BoxFormComponent extends Component
             );
 
             $movement->update([
-                'date'        => $this->date,
+                'date' => $this->date,
                 'description' => $this->description,
-                'type'        => $this->type,
-                'amount'      => $this->amount,
-                'person_id'   => $supplier->person_id,
+                'type' => $this->type,
+                'amount' => $this->amount,
+                'person_id' => $supplier->person_id,
             ]);
 
             app(CashBalanceService::class)->recalculateFromDate($this->date);
@@ -147,7 +168,7 @@ class BoxFormComponent extends Component
 
         return redirect()->route('accounts.box', [
             'date' => $this->date_account,
-            'id'   => $this->account_id
+            'id' => $this->account_id,
         ]);
     }
 

@@ -16,8 +16,20 @@ use Livewire\Component;
 
 class RetentionComponentForm extends Component
 {
-    public $id, $type, $amount, $date, $description, $summary;
+    public $id;
+
+    public $type;
+
+    public $amount;
+
+    public $date;
+
+    public $description;
+
+    public $summary;
+
     public $supplier_id = null;
+
     public ?int $person_id = null;
 
     #[Validate('required|min:5|max:150')]

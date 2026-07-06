@@ -4,26 +4,32 @@ namespace App\Livewire\Customers;
 
 use App\Models\Customer;
 use App\Models\Person;
-use App\Models\Cooperative;
-use Livewire\Component;
-use Livewire\WithFileUploads;
-use Livewire\WithPagination;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
+use Livewire\Component;
+use Livewire\WithFileUploads;
+use Livewire\WithPagination;
 use TallStackUi\Traits\Interactions;
 
 class CustomerComponent extends Component
 {
-    use WithFileUploads, WithPagination, Interactions;
+    use Interactions, WithFileUploads, WithPagination;
 
     public $customerId;
+
     public $full_name;
+
     public $ci;
+
     public $file;
+
     public $existingFile;
+
     public $cooperative_id;
+
     public ?int $quantity = 10;
+
     public ?string $search = null;
 
     protected function rules()
@@ -48,7 +54,7 @@ class CustomerComponent extends Component
             ->when($this->search, function (Builder $query) {
                 return $query->whereHas('person', function ($q) {
                     $q->where('full_name', 'like', "%{$this->search}%")
-                      ->orWhere('ci', 'like', "%{$this->search}%");
+                        ->orWhere('ci', 'like', "%{$this->search}%");
                 });
             })
             ->paginate($this->quantity)
@@ -56,13 +62,13 @@ class CustomerComponent extends Component
 
         $rows = $customers->through(function ($customer) {
             return (object) [
-                'id'           => $customer->id,
-                'ci'           => $customer->person->ci ?? '',
-                'full_name'    => $customer->person->full_name ?? '',
-                'file'         => $customer->file ? basename($customer->file) : '',
-                'file_path'    => $customer->file ? \Storage::url($customer->file) : null,
-                'cooperative'  => $customer->cooperative?->name ?? '',
-                'model'        => $customer,
+                'id' => $customer->id,
+                'ci' => $customer->person->ci ?? '',
+                'full_name' => $customer->person->full_name ?? '',
+                'file' => $customer->file ? basename($customer->file) : '',
+                'file_path' => $customer->file ? \Storage::url($customer->file) : null,
+                'cooperative' => $customer->cooperative?->name ?? '',
+                'model' => $customer,
             ];
         });
 
@@ -86,6 +92,8 @@ class CustomerComponent extends Component
 
     public function store()
     {
+        $this->authorize('Crear clientes');
+
         $this->validate();
 
         $person = Person::create([
@@ -118,11 +126,13 @@ class CustomerComponent extends Component
         $this->cooperative_id = $customer->cooperative_id;
         $this->full_name = $customer->person->full_name;
         $this->ci = $customer->person->ci;
-        $this->js("window.\$tsui.open.modal('modal-id')");
+        $this->js("window.\$tsui.open.modal('crud-modal')");
     }
 
     public function update()
     {
+        $this->authorize('Editar clientes');
+
         $this->validate();
 
         $customer = Customer::with('person')->find($this->customerId);
@@ -155,6 +165,8 @@ class CustomerComponent extends Component
 
     public function delete($id)
     {
+        $this->authorize('Eliminar clientes');
+
         $id = is_array($id) ? $id[0] : $id;
         $customer = Customer::findOrFail($id);
         if ($customer->file) {

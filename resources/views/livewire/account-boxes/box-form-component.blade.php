@@ -3,7 +3,7 @@
         <x-slot:header>
             <span class="font-semibold text-base">Registro de Movimiento de Caja</span>
         </x-slot:header>
-        <form id="box-form" wire:submit="{{ $this->id ? 'update' : 'store' }}" class="space-y-2">
+        <form id="box-form" wire:submit="{{ $this->id ? 'update' : 'store' }}" class="space-y-2" x-on:keydown.cmd.enter="$wire.{{ $this->id ? 'update' : 'store' }}()">
             {{-- Buscador de proveedor --}}
             <div class="w-full">
                 <livewire:supplier-search :ci="$ci" />
@@ -45,18 +45,18 @@
             </div>
 
             <div class="flex flex-col sm:flex-row gap-4 sm:justify-end sm:items-end">
-                <x-button color="outline" type="button" wire:click="clear()">
+                <x-button color="outline" type="button" wire:click="clear()" icon="x-mark">
                     Cancelar
                 </x-button>
-                @if ($this->id)
-                    <x-button color="primary" type="submit">
-                        Actualizar
-                    </x-button>
-                @else
-                    <x-button color="primary" type="submit">
-                        Guardar
-                    </x-button>
-                @endif
+                <x-button color="primary" type="submit" wire:loading.attr="disabled" wire:target="store,update" icon="check">
+                    <span wire:loading.remove wire:target="store,update">
+                        {{ $this->id ? 'Actualizar' : 'Guardar' }}
+                    </span>
+                    <span wire:loading wire:target="store,update" class="flex items-center gap-2">
+                        <x-ui.loading-spinner class="h-4 w-4" />
+                        Guardando...
+                    </span>
+                </x-button>
             </div>
         </form>
     </x-card>

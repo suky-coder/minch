@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('departaments', function (Blueprint $table) {
             $table->id();
-            $table->string('area',150);
-            $table->string('description',255);
+            $table->string('area', 150);
+            $table->string('description', 255);
             $table->unsignedBigInteger('account_id');
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

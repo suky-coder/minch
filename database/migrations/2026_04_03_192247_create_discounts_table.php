@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('discounts', function (Blueprint $table) {
             $table->id();
-            $table->decimal('amount',6,2);
+            $table->decimal('amount', 6, 2);
             $table->unsignedBigInteger('taxe_id')->nullable();
             $table->unsignedBigInteger('retention_id')->nullable();
             $table->timestamps();

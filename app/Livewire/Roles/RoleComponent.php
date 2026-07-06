@@ -12,10 +12,15 @@ use TallStackUi\Traits\Interactions;
 class RoleComponent extends Component
 {
     use Interactions;
+
     public $search;
-    public $quantity=10;
+
+    public $quantity = 10;
+
     public $id;
+
     public $name;
+
     public function with(): array
     {
         return [
@@ -29,25 +34,28 @@ class RoleComponent extends Component
                     return $query->where('name', 'like', "%{$this->search}%");
                 })
                 ->paginate($this->quantity)
-                ->withQueryString()
+                ->withQueryString(),
         ];
     }
+
     public function rules()
     {
         return [
-            'name' => ['required','min:4','max:150','string', Rule::unique('roles', 'name')->ignore($this->id)]
+            'name' => ['required', 'min:4', 'max:150', 'string', Rule::unique('roles', 'name')->ignore($this->id)],
         ];
     }
+
     public function render()
     {
 
         return view('livewire.roles.role-component');
     }
+
     public function store()
     {
         $this->validate();
         Role::create([
-            'name' => $this->name
+            'name' => $this->name,
         ]);
         $this->toast()
             ->expandable(false)
@@ -55,13 +63,15 @@ class RoleComponent extends Component
             ->send();
         $this->clear();
     }
+
     #[On('load::role')]
     public function edit(Role $role)
     {
         $this->id = $role->id;
         $this->name = $role->name;
-        $this->js("window.\$tsui.open.modal('modal-id')");
+        $this->js("window.\$tsui.open.modal('crud-modal')");
     }
+
     public function delete(Role $rol)
     {
         $rol->delete();
@@ -71,11 +81,13 @@ class RoleComponent extends Component
             ->send();
         $this->clear();
     }
+
     public function update()
     {
+        $this->validate();
         $rol = Role::find($this->id);
         $rol->update([
-            'name' => $this->name
+            'name' => $this->name,
         ]);
         $this->toast()
             ->expandable(false)
@@ -83,12 +95,16 @@ class RoleComponent extends Component
             ->send();
         $this->clear();
     }
-    public function clear(){
+
+    public function clear()
+    {
         $this->resetValidation();
-        $this->reset(['name','id']);
+        $this->reset(['name', 'id']);
         $this->dispatch('close-modal');
     }
-    public function updatedSearch(){
+
+    public function updatedSearch()
+    {
         $this->resetPage();
     }
 }

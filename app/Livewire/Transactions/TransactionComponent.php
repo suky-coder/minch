@@ -12,9 +12,10 @@ use TallStackUi\Traits\Interactions;
 
 class TransactionComponent extends Component
 {
-    use WithPagination, Interactions;
+    use Interactions, WithPagination;
 
     public $selectedDate = null;
+
     public $selectedSupplierId = null; // Filtro por proveedor
 
     public function mount()
@@ -47,12 +48,18 @@ class TransactionComponent extends Component
                     ->whereColumn('transactions.account_id', 'accounts.id')
                     ->where('movements.type', 'C')
                     ->whereBetween('movements.date', [$start, $end]),
+                'amountB' => Movement::selectRaw('COALESCE(SUM(amount), 0)')
+                    ->join('transactions', 'movements.id', '=', 'transactions.movement_id')
+                    ->whereColumn('transactions.account_id', 'accounts.id')
+                    ->where('movements.type', 'B')
+                    ->whereBetween('movements.date', [$start, $end]),
             ])
             ->paginate(10);
 
-        // Transformar para agregar saldo
+        // Transformar para agregar saldo (incluye saldo del mes anterior)
         $accounts->getCollection()->transform(function ($account) {
-            $account->amountS = ($account->amountD ?? 0) - ($account->amountC ?? 0);
+            $account->amountS = ($account->amountB ?? 0) + ($account->amountD ?? 0) - ($account->amountC ?? 0);
+
             return $account;
         });
 
@@ -76,7 +83,7 @@ class TransactionComponent extends Component
             'date',
             'account_id',
             'description',
-            'doc'
+            'doc',
         ]);
     }
 

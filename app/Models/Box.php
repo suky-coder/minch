@@ -14,7 +14,9 @@ class Box extends Model
     {
         static::creating(function ($model) {
             $movement = Movement::find($model->movement_id);
-            if (!$movement) return;
+            if (! $movement) {
+                return;
+            }
 
             $type = $movement->type;
             $fecha = Carbon::parse($movement->date);
@@ -39,7 +41,7 @@ class Box extends Model
 
     public function getNumberLabelAttribute(): string
     {
-        return 'DOC-' . str_pad($this->number, 8, '0', STR_PAD_LEFT);
+        return 'DOC-'.str_pad($this->number, 8, '0', STR_PAD_LEFT);
     }
 
     public function getFormattedLastNumberAttribute(): string

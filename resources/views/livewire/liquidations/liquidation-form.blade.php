@@ -1,27 +1,29 @@
 <div>
     <x-card>
         <x-slot:header>
-            <span class="font-semibold text-base">{{ $this->id ? 'Actualizar' : 'Agregar' }} | Recibo</span>
+            <span class="font-semibold text-base">{{ $this->id ? 'Actualizar' : 'Agregar' }}
+                <span x-text="metal === 'zn' ? 'Zn (Zinc)' : 'Pb (Plomo)'"></span>
+                | Recibo
+            </span>
         </x-slot:header>
         <div class="row ">
             <form id="user-create" wire:submit="save" class="space-y-2">
                 <div class="space-y-1">
 
-
                     <div x-data="{
+                        // Metal selector
+                        metal: @entangle('metal'),
                         tab: 'generales',
+                        // Shared defaults
                         tmh: 22.720,
                         h2o: 11.45,
                         merma: 1,
-                        NIM: 1.55,
                         dm: 6.91,
-                        zinc: 54.06,
-                        Zn: 3434,
                         base: 3000,
-                        maquila: 90,
                         basePorcentaje: 0.15,
                         baseEscalacion: 0,
-                        Ag: 0,  
+                        maquila: 90,
+                        Ag: 0,
                         Sb:0.1,
                         Fe:9.5,
                         SiO2:5,
@@ -44,7 +46,6 @@
                         PSnp:0.1,
                         AgUSD: 75,
                         agNIM:76.38,
-                        regaliaZn:3,
                         regaliaAg:3.6,
                         factorRegalia:6.96,
                         tc:8.70,
@@ -56,6 +57,75 @@
                         fedecomin:1,
                         fencomin:0.4,
                         aporteCoop:0,
+                        // Zn-specific
+                        NIM: 1.55,
+                        zinc: 54.06,
+                        Zn: 3434,
+                        regaliaZn:3,
+                        // Pb-specific
+                        nimPb: 0.88,
+                        plomo: 52.88,
+                        Pb: 1936,
+                        regaliaPb:3,
+                        refinacion: 0.05,
+                        payabilidadPb: 0.95,
+                        payabilidadAg: 0.95,
+                        init() {
+                            this.setDefaults();
+                        },
+                        setDefaults() {
+                            if (this.metal === 'zn') {
+                                this.tmh = 22.720;
+                                this.h2o = 11.45;
+                                this.dm = 6.91;
+                                this.base = 3000;
+                                this.maquila = 90;
+                                this.Sb = 0.1;
+                                this.Fe = 9.5;
+                                this.SiO2 = 5;
+                                this.Sn = 0;
+                                this.As = 0.1;
+                                this.PAsUSD = 3;
+                                this.PSbUSD = 3;
+                                this.PFeUSD = 3;
+                                this.PSiO2USD = 3;
+                                this.PSnUSD = 3;
+                                this.AgUSD = 75;
+                                this.tc = 8.70;
+                                this.flete = 160;
+                                this.rollback = 42;
+                                this.comibol = 1;
+                                this.NIM = 1.55;
+                                this.zinc = 54.06;
+                                this.Zn = 3434;
+                                this.regaliaZn = 3;
+                            } else {
+                                this.tmh = 35.920;
+                                this.h2o = 10.67;
+                                this.dm = 24.21;
+                                this.base = 2000;
+                                this.maquila = 0;
+                                this.Sb = 1.30;
+                                this.Fe = 6.20;
+                                this.SiO2 = 3;
+                                this.Sn = 0;
+                                this.As = 1.30;
+                                this.PAsUSD = 3.5;
+                                this.PSbUSD = 3.5;
+                                this.PFeUSD = 3.5;
+                                this.PSiO2USD = 3.5;
+                                this.PSnUSD = 3.5;
+                                this.AgUSD = 73.50;
+                                this.tc = 9.10;
+                                this.flete = 180;
+                                this.rollback = 38;
+                                this.comibol = 0;
+                                this.nimPb = 0.88;
+                                this.plomo = 52.88;
+                                this.Pb = 1936;
+                                this.regaliaPb = 3;
+                            }
+                        },
                         get tms() {
                             return Number((this.tmh - (this.tmh * this.h2o / 100)).toFixed(3));
                         },
@@ -68,38 +138,63 @@
                         get platacalculate() {
                             return (parseFloat(this.dm) * 100) / 31.1035;
                         },
-                        get zincporcentual() {
-                            return Number(this.zinc) - 8;
+                        get ley() {
+                            return this.metal === 'zn' ? parseFloat(this.zinc) : parseFloat(this.plomo);
+                        },
+                        get precioMetal() {
+                            return this.metal === 'zn' ? Number(this.Zn) : Number(this.Pb);
+                        },
+                        get nim() {
+                            return this.metal === 'zn' ? Number(this.NIM) : Number(this.nimPb);
+                        },
+                        get deduccionMetal() {
+                            return this.metal === 'zn' ? 8 : 3;
+                        },
+                        get deduccionAg() {
+                            return this.metal === 'zn' ? 3 : 1.6;
+                        },
+                        get payAg() {
+                            return this.metal === 'zn' ? 0.7 : Number(this.payabilidadAg);
+                        },
+                        get leyPorcentual() {
+                            return this.ley - this.deduccionMetal;
+                        },
+                        get valorMetal() {
+                            if (this.metal === 'zn') {
+                                return this.leyPorcentual * this.precioMetal / 100;
+                            } else {
+                                return this.leyPorcentual * this.precioMetal * Number(this.payabilidadPb) / 100;
+                            }
                         },
                         get plataporcentual() {
-                            return ((parseFloat(this.dm) * 100) / 31.1035) - 3;
+                            return this.platacalculate - this.deduccionAg;
                         },
-                        get maquilaS() {
-                            return this.zincporcentual * Number(this.Zn) / 100;
-                        }, 
                         get platavalue() {
-                            return Number(this.AgUSD) * 0.7;
+                            return Number(this.AgUSD) * this.payAg;
                         },
                         get totalplata() {
-                            return this.plataporcentual* this.platavalue;
+                            return this.plataporcentual * this.platavalue;
                         },
                         get baseEscala() {
-                            if (Number(this.Zn) > Number(this.base)) {
-                                return Number(this.Zn) - Number(this.base);
+                            if (this.precioMetal > Number(this.base)) {
+                                return this.precioMetal - Number(this.base);
                             } else {
                                 return 0;
                             }
                         },
                         get baseTotal() {
-                            if (Number(this.Zn) > Number(this.base)) {
-                                return (Number(this.Zn) - Number(this.base)) * Number(this.basePorcentaje);
+                            if (this.precioMetal > Number(this.base)) {
+                                return (this.precioMetal - Number(this.base)) * Number(this.basePorcentaje);
                             } else {
                                 return 0 * Number(this.basePorcentaje);
                             }
                         },
+                        get refinacionTotal() {
+                            return this.platacalculate * Number(this.refinacion);
+                        },
                         get AsTotal(){
                             if(Number(this.As) > Number(this.PAs)){
-                                return ((Number(this.As)-Number(this.PAs))*(Number(this.PAsUSD)*Number(this.PAsp)))*100000;
+                                return (Number(this.As)-Number(this.PAs))*(Number(this.PAsUSD)/Number(this.PAsp));
                             }
                             else{
                                 return 0;
@@ -107,7 +202,7 @@
                         },
                         get SbTotal(){
                             if(Number(this.Sb) > Number(this.PSb)){
-                                return ((Number(this.Sb)-Number(this.PSb))*(Number(this.PSbUSD)*Number(this.PSbp)))*100000;
+                                return (Number(this.Sb)-Number(this.PSb))*(Number(this.PSbUSD)/Number(this.PSbp));
                             }
                             else{
                                 return 0;
@@ -115,7 +210,7 @@
                         },
                         get FeTotal(){
                             if(Number(this.Fe) > Number(this.PFe)){
-                                return ((Number(this.Fe)-Number(this.PFe))*(Number(this.PFeUSD)*Number(this.PFep)));
+                                return (Number(this.Fe)-Number(this.PFe))*(Number(this.PFeUSD)/Number(this.PFep));
                             }
                             else{
                                 return 0;
@@ -123,7 +218,7 @@
                         },
                         get SiO2Total(){
                             if(Number(this.SiO2) > Number(this.PSiO2)){
-                                return ((Number(this.SiO2)-Number(this.PSiO2))*(Number(this.PSiO2USD)*Number(this.PSiO2p)));
+                                return (Number(this.SiO2)-Number(this.PSiO2))*(Number(this.PSiO2USD)/Number(this.PSiO2p));
                             }
                             else{
                                 return 0;
@@ -131,24 +226,29 @@
                         },
                         get SnTotal(){
                             if(Number(this.Sn) > Number(this.PSn)){
-                                return ((Number(this.Sn)-Number(this.PSn))*(Number(this.PSnUSD)*Number(this.PSnp)));
+                                return (Number(this.Sn)-Number(this.PSn))*(Number(this.PSnUSD)/Number(this.PSnp));
                             }
                             else{
                                 return 0;
                             }
                         },
                         get totalCT() {
-                            return parseFloat(this.maquila) + this.baseTotal + this.AsTotal + this.SbTotal + this.FeTotal + this.SiO2Total + this.SnTotal;
+                            const base = this.baseTotal + this.AsTotal + this.SbTotal + this.FeTotal + this.SiO2Total + this.SnTotal;
+                            if (this.metal === 'zn') {
+                                return parseFloat(this.maquila) + base;
+                            } else {
+                                return parseFloat(this.maquila) + this.refinacionTotal + base;
+                            }
                         },
                         get valorNeto() {
-                            return Number((this.maquilaS + this.totalplata - this.totalCT).toFixed(2));
+                            return Number((this.valorMetal + this.totalplata - this.totalCT).toFixed(2));
                         },
                         get totalNetoUSD() {
                             return Number(this.valorNeto) * Number(this.tmns);
                         },
                         get gastosOp(){
-                            return ((this.tmns*1000*Number(this.zinc)/100*2.2046223*Number(this.NIM)*5/100) + (Number(this.dm)*this.tmns/10*32.15073*Number(this.agNIM)*6/100)) -  ((this.tmns*1000*Number(this.zinc)/100*2.2046223*Number(this.NIM)*3/100) + (Number(this.dm)*this.tmns/10*32.15073*Number(this.agNIM)*3.6/100));
-                        },                        
+                            return ((this.tmns*1000*this.ley/100*2.2046223*this.nim*5/100) + (Number(this.dm)*this.tmns/10*32.15073*Number(this.agNIM)*6/100)) -  ((this.tmns*1000*this.ley/100*2.2046223*this.nim*3/100) + (Number(this.dm)*this.tmns/10*32.15073*Number(this.agNIM)*3.6/100));
+                        },
                         get totalFlete() {
                             return Number(this.flete) * Number(this.tmh);
                         },
@@ -170,14 +270,15 @@
                         get totalBs() {
                             return this.totalUSD * Number(this.tc);
                         },
-                        get regaliaZnBs() {
-                            return (this.tmns*1000*Number(this.zinc)/100*2.2046223*Number(this.NIM)*Number(this.regaliaZn)/100)*Number(this.factorRegalia);
+                        get regaliaMetalBs() {
+                            const r = this.metal === 'zn' ? Number(this.regaliaZn) : Number(this.regaliaPb);
+                            return (this.tmns*1000*this.ley/100*2.2046223*this.nim*r/100)*Number(this.factorRegalia);
                         },
                         get regaliaAgBs() {
                             return (Number(this.dm)*this.tmns/10*32.15073*Number(this.agNIM)*Number(this.regaliaAg)/100)*Number(this.factorRegalia)
                         },
                         get totalRM() {
-                            return this.regaliaZnBs + this.regaliaAgBs;
+                            return this.regaliaMetalBs + this.regaliaAgBs;
                         },
                         get cnsBs() {
                             return this.totalBs * Number(this.cns) / 100;
@@ -201,6 +302,16 @@
                             return this.totalBs - this.totalRM - this.totalAportes;
                         }
                     }">
+
+                        {{-- Metal Selector --}}
+                        <div class="flex items-center gap-3 mb-4 p-3 bg-gray-50 dark:bg-dark-700 rounded-lg">
+                            <span class="text-sm font-semibold text-gray-600 dark:text-dark-300">Metal:</span>
+                            <select x-model="metal" @change="setDefaults()"
+                                class="rounded-lg border-gray-300 dark:border-dark-500 dark:bg-dark-600 text-sm font-medium focus:border-primary-500 focus:ring-primary-500">
+                                <option value="zn">Zn (Zinc)</option>
+                                <option value="pb">Pb (Plomo)</option>
+                            </select>
+                        </div>
 
                         {{-- Tab Navigation --}}
                         <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-200 dark:border-dark-600 pb-3">
@@ -235,15 +346,15 @@
                         <div x-show="tab === 'generales'" x-transition>
                             <div class="flex flex-col sm:flex-row gap-4">
                                 <div class="w-full sm:w-1/2">
-                                    <x-input label="Nº LOTE" type="number" placeholder="NIT" wire:model="lote" />
+                                    <x-input label="Nº LOTE" type="text" placeholder="MCH-###" wire:model="lote" />
                                 </div>
                                 <div class="w-full sm:w-1/2">
-                                    <x-input label="FECHA DE LIQ." type="text" placeholder="NIM" wire:model="date" />
+                                    <x-input label="FECHA DE LIQ." type="text" placeholder="dd/mm/aaaa" wire:model="date" />
                                 </div>
                             </div>
                             <div class="flex flex-col sm:flex-row gap-4">
                                 <div class="w-full sm:w-1/2">
-                                    <x-input label="PROVEEDOR." type="text" placeholder="NIM" wire:model="full_name" />
+                                    <x-input label="PROVEEDOR" type="text" placeholder="Nombre" wire:model="full_name" />
                                 </div>
                                 <div class="w-full sm:w-1/2">
                                     <livewire:liquidations.supplier-cooperative-search :ci="$ci" />
@@ -251,34 +362,34 @@
                             </div>
                             <div class="flex flex-col sm:flex-row gap-4">
                                 <div class="w-full sm:w-1/2">
-                                    <x-input label="COOP. MiNERA:" type="text" placeholder="NIM" wire:model="name" />
+                                    <x-input label="COOP. MINERA:" type="text" wire:model="name" />
                                 </div>
                                 <div class="w-full sm:w-1/2">
-                                    <x-input label="NIM:" type="text" placeholder="NIM" wire:model="nim" />
-                                </div>
-                            </div>
-                            <div class="flex flex-col sm:flex-row gap-4">
-                                <div class="w-full sm:w-1/2">
-                                    <x-input label="CONCESIÓN:" type="text" placeholder="NIM" wire:model="concession" />
-                                </div>
-                                <div class="w-full sm:w-1/2">
-                                    <x-input label="LAB. QUÍMICO:" type="text" placeholder="NIM" wire:model="lab_quimico" />
+                                    <x-input label="NIM:" type="text" wire:model="nim" />
                                 </div>
                             </div>
                             <div class="flex flex-col sm:flex-row gap-4">
                                 <div class="w-full sm:w-1/2">
-                                    <x-input label="MINA:" type="text" placeholder="NIM" wire:model="mine" />
+                                    <x-input label="CONCESIÓN:" type="text" wire:model="concession" />
                                 </div>
                                 <div class="w-full sm:w-1/2">
-                                    <x-input label="NÚMERO LAB.:" type="text" placeholder="NIM" wire:model="number_lab" />
+                                    <x-input label="LAB. QUÍMICO:" type="text" wire:model="lab_quimico" />
                                 </div>
                             </div>
                             <div class="flex flex-col sm:flex-row gap-4">
                                 <div class="w-full sm:w-1/2">
-                                    <x-input label="MUNICIPIO:" type="text" placeholder="NIM" wire:model="municipality" />
+                                    <x-input label="MINA:" type="text" wire:model="mine" />
                                 </div>
                                 <div class="w-full sm:w-1/2">
-                                    <x-input label="CÓDIGO:" type="text" placeholder="NIM" wire:model="codigo" />
+                                    <x-input label="NÚMERO LAB.:" type="text" wire:model="number_lab" />
+                                </div>
+                            </div>
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <div class="w-full sm:w-1/2">
+                                    <x-input label="MUNICIPIO:" type="text" wire:model="municipality" />
+                                </div>
+                                <div class="w-full sm:w-1/2">
+                                    <x-input label="CÓDIGO:" type="text" wire:model="codigo" />
                                 </div>
                             </div>
 
@@ -293,10 +404,24 @@
                                 </div>
                                 <div class="flex flex-col sm:flex-row gap-4">
                                     <div class="w-full sm:w-1/2">
-                                        <x-input prefix="Zn:" type="text" wire:model="NIM" x-model="NIM" suffix="USD/TM" />
+                                        {{-- Zn quincenal --}}
+                                        <template x-if="metal === 'zn'">
+                                            <x-input prefix="Zn:" type="text" wire:model="NIM" x-model="NIM" suffix="USD/TM" />
+                                        </template>
+                                        {{-- Pb quincenal --}}
+                                        <template x-if="metal === 'pb'">
+                                            <x-input prefix="Pb:" type="text" wire:model="nimPb" x-model="nimPb" suffix="USD/TM" />
+                                        </template>
                                     </div>
                                     <div class="w-full sm:w-1/2">
-                                        <x-input prefix="Zn:" type="text" wire:model="Zn" x-model="Zn" suffix="USD/TM" />
+                                        {{-- Zn mercado --}}
+                                        <template x-if="metal === 'zn'">
+                                            <x-input prefix="Zn:" type="text" wire:model="Zn" x-model="Zn" suffix="USD/TM" />
+                                        </template>
+                                        {{-- Pb mercado --}}
+                                        <template x-if="metal === 'pb'">
+                                            <x-input prefix="Pb:" type="text" wire:model="Pb" x-model="Pb" suffix="USD/TM" />
+                                        </template>
                                     </div>
                                 </div>
                                 <div class="flex flex-col sm:flex-row gap-4">
@@ -329,7 +454,14 @@
                                     <x-input prefix="TMH:" x-model="tmh" type="number" />
                                 </div>
                                 <div class="w-full sm:w-1/3">
-                                    <x-input prefix="Zn" suffix="%" x-model="zinc" type="number" />
+                                    {{-- Zn ley --}}
+                                    <template x-if="metal === 'zn'">
+                                        <x-input prefix="Zn" suffix="%" x-model="zinc" type="number" />
+                                    </template>
+                                    {{-- Pb ley --}}
+                                    <template x-if="metal === 'pb'">
+                                        <x-input prefix="Pb" suffix="%" x-model="plomo" type="number" />
+                                    </template>
                                 </div>
                                 <div class="w-full sm:w-1/3">
                                     <x-input prefix="As" suffix="%" x-model="As"/>
@@ -350,7 +482,7 @@
 
                             <div class="flex flex-col sm:flex-row gap-4">
                                 <div class="w-full sm:w-1/3">
-                                    <x-input prefix="TMS:" :value="''" x-bind:value="tms.toFixed(3)" readonly />
+                                    <x-input prefix="TMS:" x-bind:value="tms.toFixed(3)" readonly />
                                 </div>
                                 <div class="w-full sm:w-1/3">
                                     <x-input suffix="Dm" x-model="dm" type="number" />
@@ -392,16 +524,16 @@
 
                             <div class="flex flex-col sm:flex-row gap-4">
                                 <div class="w-full sm:w-1/4">
-                                    <x-input prefix="Zinz:" x-bind:value="parseFloat(zinc)" readonly />
+                                    <x-input x-bind:prefix="metal === 'zn' ? 'Zinc:' : 'Plomo:'" x-bind:value="ley" readonly />
                                 </div>
                                 <div class="w-full sm:w-1/4">
-                                    <x-input suffix="%" :value="''" x-bind:value="zincporcentual.toFixed(2)" readonly />
+                                    <x-input suffix="%" x-bind:value="leyPorcentual.toFixed(2)" readonly />
                                 </div>
                                 <div class="w-full sm:w-1/4">
-                                    <x-input x-bind:value="parseFloat(Zn)" readonly />
+                                    <x-input x-bind:value="precioMetal" readonly />
                                 </div>
                                 <div class="w-full sm:w-1/4">
-                                    <x-input prefix="=" value="''" x-bind:value="maquilaS.toFixed(2)" readonly />
+                                    <x-input prefix="=" x-bind:value="valorMetal.toFixed(2)" readonly />
                                 </div>
                             </div>
                             <div class="flex flex-col sm:flex-row gap-4">
@@ -409,13 +541,13 @@
                                     <x-input prefix="Plata:" x-bind:value="platacalculate.toFixed(2)" readonly />
                                 </div>
                                 <div class="w-full sm:w-1/4">
-                                    <x-input suffix="Oz/Tm" :value="''" x-bind:value="plataporcentual.toFixed(2)" readonly />
+                                    <x-input suffix="Oz/Tm" x-bind:value="plataporcentual.toFixed(2)" readonly />
                                 </div>
                                 <div class="w-full sm:w-1/4">
-                                    <x-input suffix="%" :value="''" x-bind:value="platavalue.toFixed(2)" readonly />
+                                    <x-input suffix="%" x-bind:value="platavalue.toFixed(2)" readonly />
                                 </div>
                                 <div class="w-full sm:w-1/4">
-                                    <x-input prefix="=" :value="''" x-bind:value="totalplata.toFixed(2)" readonly />
+                                    <x-input prefix="=" x-bind:value="totalplata.toFixed(2)" readonly />
                                 </div>
                             </div>
 
@@ -428,19 +560,28 @@
                                 </div>
                                 <div class="flex flex-col sm:flex-row gap-2 mt-2">
                                     <div class="w-full sm:w-1/5">
-                                        <x-input prefix="Base/Escalacion:" x-bind:value="parseFloat(Zn).toFixed(2)" readonly />
+                                        <x-input prefix="Base/Escalacion:" x-bind:value="precioMetal" readonly />
                                     </div>
                                     <div class="w-full sm:w-1/5">
-                                        <x-input :value="''" x-bind:value="parseFloat(base).toFixed(2)" readonly />
+                                        <x-input x-bind:value="parseFloat(base).toFixed(2)" readonly />
                                     </div>
                                     <div class="w-full sm:w-1/5">
-                                        <x-input :value="''" x-bind:value="baseEscala.toFixed(2)" readonly />
+                                        <x-input x-bind:value="baseEscala.toFixed(2)" readonly />
                                     </div>
                                     <div class="w-full sm:w-1/5">
-                                        <x-input :value="''" x-model="basePorcentaje" />
+                                        <x-input x-model="basePorcentaje" />
                                     </div>
                                     <div class="w-full sm:w-1/5">
-                                        <x-input prefix="=" :value="''" x-bind:value="baseTotal.toFixed(2)" readonly />
+                                        <x-input prefix="=" x-bind:value="baseTotal.toFixed(2)" readonly />
+                                    </div>
+                                </div>
+                                {{-- Refinacion (Pb only) --}}
+                                <div x-show="metal === 'pb'" class="flex flex-col sm:flex-row gap-2 mt-2">
+                                    <div class="w-full sm:w-1/5">
+                                        <x-input prefix="Refinacion:" x-model="refinacion" />
+                                    </div>
+                                    <div class="w-full sm:w-1/5">
+                                        <x-input prefix="=" x-bind:value="refinacionTotal.toFixed(2)" readonly />
                                     </div>
                                 </div>
                             </div>
@@ -449,87 +590,87 @@
                                 <h1 class="text-sm font-semibold text-gray-600 dark:text-dark-300 mb-3">Penalidades</h1>
                                 <div class="flex flex-col sm:flex-row gap-2">
                                     <div class="w-full sm:w-1/5">
-                                        <x-input prefix="As:" :value="''" x-bind:value="parseFloat(As).toFixed(2)" readonly />
+                                        <x-input prefix="As:" x-bind:value="parseFloat(As).toFixed(2)" readonly />
                                     </div>
                                     <div class="w-full sm:w-1/5">
-                                        <x-input :value="''" x-model="PAs" suffix="%" />
+                                        <x-input x-model="PAs" suffix="%" />
                                     </div>
                                     <div class="w-full sm:w-1/5">
                                         <x-input prefix="USD:" x-model="PAsUSD" suffix="/TMS" />
                                     </div>
                                     <div class="w-full sm:w-1/5">
-                                        <x-input :value="''" x-model="PAsp" suffix="%" />
+                                        <x-input x-model="PAsp" suffix="%" />
                                     </div>
                                     <div class="w-full sm:w-1/5">
-                                        <x-input prefix="=" :value="''" x-bind:value="AsTotal.toFixed(2)" readonly />
+                                        <x-input prefix="=" x-bind:value="AsTotal.toFixed(2)" readonly />
                                     </div>
                                 </div>
                                 <div class="flex flex-col sm:flex-row gap-2">
                                     <div class="w-full sm:w-1/5">
-                                        <x-input prefix="Sb:" :value="''" x-bind:value="parseFloat(Sb).toFixed(2)" readonly />
+                                        <x-input prefix="Sb:" x-bind:value="parseFloat(Sb).toFixed(2)" readonly />
                                     </div>
                                     <div class="w-full sm:w-1/5">
-                                        <x-input :value="''" x-model="PSb" suffix="%" />
+                                        <x-input x-model="PSb" suffix="%" />
                                     </div>
                                     <div class="w-full sm:w-1/5">
                                         <x-input prefix="USD:" x-model="PSbUSD" suffix="/TMS" />
                                     </div>
                                     <div class="w-full sm:w-1/5">
-                                        <x-input :value="''" x-model="PSbp" suffix="%" />
+                                        <x-input x-model="PSbp" suffix="%" />
                                     </div>
                                     <div class="w-full sm:w-1/5">
-                                        <x-input prefix="=" :value="''" x-bind:value="SbTotal.toFixed(2)" readonly />
+                                        <x-input prefix="=" x-bind:value="SbTotal.toFixed(2)" readonly />
                                     </div>
                                 </div>
                                 <div class="flex flex-col sm:flex-row gap-2">
                                     <div class="w-full sm:w-1/5">
-                                        <x-input prefix="Fe:" :value="''" x-bind:value="parseFloat(Fe).toFixed(2)" readonly />
+                                        <x-input prefix="Fe:" x-bind:value="parseFloat(Fe).toFixed(2)" readonly />
                                     </div>
                                     <div class="w-full sm:w-1/5">
-                                        <x-input :value="''" x-model="PFe" suffix="%" />
+                                        <x-input x-model="PFe" suffix="%" />
                                     </div>
                                     <div class="w-full sm:w-1/5">
                                         <x-input prefix="USD:" x-model="PFeUSD" suffix="/TMS" />
                                     </div>
                                     <div class="w-full sm:w-1/5">
-                                        <x-input :value="''" x-model="PFep" suffix="%" />
+                                        <x-input x-model="PFep" suffix="%" />
                                     </div>
                                     <div class="w-full sm:w-1/5">
-                                        <x-input prefix="=" :value="''" x-bind:value="FeTotal.toFixed(2)" readonly />
+                                        <x-input prefix="=" x-bind:value="FeTotal.toFixed(2)" readonly />
                                     </div>
                                 </div>
                                 <div class="flex flex-col sm:flex-row gap-2">
                                     <div class="w-full sm:w-1/5">
-                                        <x-input prefix="SiO2:" :value="''" x-bind:value="parseFloat(SiO2).toFixed(2)" readonly />
+                                        <x-input prefix="SiO2:" x-bind:value="parseFloat(SiO2).toFixed(2)" readonly />
                                     </div>
                                     <div class="w-full sm:w-1/5">
-                                        <x-input :value="''" x-model="PSiO2" suffix="%" />
+                                        <x-input x-model="PSiO2" suffix="%" />
                                     </div>
                                     <div class="w-full sm:w-1/5">
                                         <x-input prefix="USD:" x-model="PSiO2USD" suffix="/TMS" />
                                     </div>
                                     <div class="w-full sm:w-1/5">
-                                        <x-input :value="''" x-model="PSiO2p" suffix="%" />
+                                        <x-input x-model="PSiO2p" suffix="%" />
                                     </div>
                                     <div class="w-full sm:w-1/5">
-                                        <x-input prefix="=" :value="''" x-bind:value="SiO2Total.toFixed(2)" readonly />
+                                        <x-input prefix="=" x-bind:value="SiO2Total.toFixed(2)" readonly />
                                     </div>
                                 </div>
                                 <div class="flex flex-col sm:flex-row gap-2">
                                     <div class="w-full sm:w-1/5">
-                                        <x-input prefix="Sn:" :value="''" x-bind:value="parseFloat(Sn).toFixed(2)" readonly />
+                                        <x-input prefix="Sn:" x-bind:value="parseFloat(Sn).toFixed(2)" readonly />
                                     </div>
                                     <div class="w-full sm:w-1/5">
-                                        <x-input :value="''" x-model="PSn" suffix="%" />
+                                        <x-input x-model="PSn" suffix="%" />
                                     </div>
                                     <div class="w-full sm:w-1/5">
                                         <x-input prefix="USD:" x-model="PSnUSD" suffix="/TMS" />
                                     </div>
                                     <div class="w-full sm:w-1/5">
-                                        <x-input :value="''" x-model="PSnp" suffix="%" />
+                                        <x-input x-model="PSnp" suffix="%" />
                                     </div>
                                     <div class="w-full sm:w-1/5">
-                                        <x-input prefix="=" :value="''" x-bind:value="SnTotal.toFixed(2)" readonly />
+                                        <x-input prefix="=" x-bind:value="SnTotal.toFixed(2)" readonly />
                                     </div>
                                 </div>
                             </div>
@@ -607,10 +748,15 @@
                             <h1 class="text-sm font-semibold text-gray-600 dark:text-dark-300 mb-3">Regalías</h1>
                             <div class="flex flex-col sm:flex-row gap-4">
                                 <div class="w-full sm:w-1/3">
-                                    <x-input prefix="Regalía Zn:" x-model="regaliaZn" suffix="%" />
+                                    <template x-if="metal === 'zn'">
+                                        <x-input prefix="Regalía Zn:" x-model="regaliaZn" suffix="%" />
+                                    </template>
+                                    <template x-if="metal === 'pb'">
+                                        <x-input prefix="Regalía Pb:" x-model="regaliaPb" suffix="%" />
+                                    </template>
                                 </div>
                                 <div class="w-full sm:w-1/3">
-                                    <x-input prefix="=" x-bind:value="regaliaZnBs.toFixed(2)" readonly suffix="Bs" />
+                                    <x-input prefix="=" x-bind:value="regaliaMetalBs.toFixed(2)" readonly suffix="Bs" />
                                 </div>
                             </div>
                             <div class="flex flex-col sm:flex-row gap-4">
@@ -695,7 +841,7 @@
         </div>
         <x-slot:footer>
             <div class="flex justify-end gap-2">
-                <x-button wire:navigate href="{{ route('retentions') }}" text="Cancelar" icon="x-mark"
+                <x-button wire:navigate href="{{ route('liquidation.form') }}" text="Cancelar" icon="x-mark"
                     color="secondary" />
                 @if ($this->id)
                     <x-button wire:click.prevent="update()" wire:loading.attr="disabled" text="Actualizar"

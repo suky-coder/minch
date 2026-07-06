@@ -187,7 +187,7 @@ class AccountStatementComponent extends Component
         $this->ci = $record->person->ci ?? '';
         $this->phone = $record->person->phone ?? '';
         $this->cooperative_id = $record->cooperative_id;
-        $this->js("window.\$tsui.open.modal('modal-id')");
+        $this->js("window.\$tsui.open.modal('crud-modal')");
     }
 
     private function persistSupplier(): void

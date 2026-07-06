@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Retention;
-use Illuminate\Http\Request;
 use App\Exports\RetentionsExport;
+use App\Models\Retention;
 use App\Models\Taxe;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
@@ -20,6 +19,7 @@ class ExcelController extends Controller
             ->where('type', $type)
             ->get();
         $taxes = Taxe::where('type', $type)->orWhere('type', 'A')->get();
-        return Excel::download(new RetentionsExport($retentions, $taxes, $type), 'retenciones_' . now()->format('Ymd_His') . '.xlsx');
+
+        return Excel::download(new RetentionsExport($retentions, $taxes, $type), 'retenciones_'.now()->format('Ymd_His').'.xlsx');
     }
 }

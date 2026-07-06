@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('taxes', function (Blueprint $table) {
             $table->id();
-            $table->string('name',150);
-            $table->string('initials',6);
-            $table->string('number',6);
-            $table->decimal('applied_discount',4,2);
-            $table->enum('type',['A','S','G']);
+            $table->string('name', 150);
+            $table->string('initials', 6);
+            $table->string('number', 6);
+            $table->decimal('applied_discount', 4, 2);
+            $table->enum('type', ['A', 'S', 'G']);
             $table->timestamps();
         });
     }

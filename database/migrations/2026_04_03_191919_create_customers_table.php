@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
-            $table->string('file',150)->nullable();
+            $table->string('file', 150)->nullable();
             $table->unsignedBigInteger('person_id');
             $table->unsignedBigInteger('cooperative_id')->nullable();
             $table->foreign('cooperative_id')->references('id')->on('cooperatives')->onDelete('set null');
@@ -21,6 +21,7 @@ return new class extends Migration
             $table->timestamps();
         });
     }
+
     public function down(): void
     {
         Schema::dropIfExists('customers');

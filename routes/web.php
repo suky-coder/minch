@@ -8,14 +8,19 @@ use App\Livewire\Accounts\AccountComponent;
 use App\Livewire\AccountStatements\AccountStatementComponent;
 use App\Livewire\AccountStatements\AccountStatementView;
 use App\Livewire\Cooperatives\CooperativeComponent;
+use App\Livewire\Cotizaciones\CotizacionComponent;
+use App\Livewire\Customers\CustomerComponent;
 use App\Livewire\Dashboard;
+use App\Livewire\Departaments\DepartamentComponent;
 use App\Livewire\Liquidations\LiquidationForm;
 use App\Livewire\Permissions\PermissionComponent;
+use App\Livewire\Reports\BankBookReportsComponent;
+use App\Livewire\Reports\BoxReportsComponent;
+use App\Livewire\Reports\LiquidationReportsComponent;
+use App\Livewire\Reports\RetentionReportsComponent;
 use App\Livewire\Retentions\RetentionComponent;
 use App\Livewire\Retentions\RetentionComponentForm;
 use App\Livewire\Roles\RoleComponent;
-use App\Livewire\Customers\CustomerComponent;
-use App\Livewire\Departaments\DepartamentComponent;
 use App\Livewire\Suppliers\SupplierComponent;
 use App\Livewire\Taxe\TaxeComponent;
 use App\Livewire\Transactions\TransactionComponent;
@@ -51,10 +56,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('account.statement.pdf');
     });
 
-    Route::get('accounts-boxes', AccountBoxComponent::class)->name('accounts.box');
-    Route::get('accounts-boxes/form/{id?}', BoxFormComponent::class)->name('accounts.box.form');
-    Route::get('movement/box/pdf/{id}', [PdfController::class, 'receiptBox'])->name('receipt.box.pdf');
-    Route::get('account/box/pdf', [PdfController::class, 'accountBox'])->name('account.box.pdf');
+    Route::middleware('permission:Ver caja chica')->group(function () {
+        Route::get('accounts-boxes', AccountBoxComponent::class)->name('accounts.box');
+        Route::get('account/box/pdf', [PdfController::class, 'accountBox'])->name('account.box.pdf');
+    });
+
+    Route::middleware('permission:Crear caja chica|Editar caja chica')->group(function () {
+        Route::get('accounts-boxes/form/{id?}', BoxFormComponent::class)->name('accounts.box.form');
+    });
+
+    Route::middleware('permission:PDF caja chica')->group(function () {
+        Route::get('movement/box/pdf/{id}', [PdfController::class, 'receiptBox'])->name('receipt.box.pdf');
+    });
 
     Route::middleware('permission:Ver retenciones')->group(function () {
         Route::get('retentions', RetentionComponent::class)->name('retentions');
@@ -69,11 +82,38 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('retention-month/excel/{date}/{type}', [ExcelController::class, 'retentionMonth'])->name('retention.month.excel');
     });
 
-    Route::get('suppliers', SupplierComponent::class)->name('suppliers');
-    Route::get('customers', CustomerComponent::class)->name('customers');
-    Route::get('departments', DepartamentComponent::class)->name('departments');
-    Route::get('cooperatives', CooperativeComponent::class)->name('cooperatives');
-    Route::get('liquidations/form', LiquidationForm::class)->name('liquidation.form');
+    Route::middleware('permission:Ver proveedores')->group(function () {
+        Route::get('suppliers', SupplierComponent::class)->name('suppliers');
+    });
+
+    Route::middleware('permission:Ver clientes')->group(function () {
+        Route::get('customers', CustomerComponent::class)->name('customers');
+    });
+
+    Route::middleware('permission:Ver departamentos')->group(function () {
+        Route::get('departments', DepartamentComponent::class)->name('departments');
+    });
+
+    Route::middleware('permission:Ver cooperativas')->group(function () {
+        Route::get('cooperatives', CooperativeComponent::class)->name('cooperatives');
+    });
+
+    Route::middleware('permission:Ver liquidaciones')->group(function () {
+        Route::get('liquidations/form', LiquidationForm::class)->name('liquidation.form');
+    });
+
+    Route::middleware('permission:Ver cotizaciones')->group(function () {
+        Route::get('cotizaciones', CotizacionComponent::class)->name('cotizaciones');
+    });
+
+    Route::middleware('permission:Ver reportes')->group(function () {
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('retentions', RetentionReportsComponent::class)->name('retentions');
+            Route::get('box', BoxReportsComponent::class)->name('box');
+            Route::get('bank-book', BankBookReportsComponent::class)->name('bank-book');
+            Route::get('liquidations', LiquidationReportsComponent::class)->name('liquidations');
+        });
+    });
 
     Route::middleware('permission:Ver usuarios')->group(function () {
         Route::get('users', UserComponent::class)->name('users');

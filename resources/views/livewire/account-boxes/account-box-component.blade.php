@@ -1,112 +1,154 @@
-<div class="space-y-4">
-    <div class="flex items-center gap-2">
-        <x-button color="outline" icon="arrow-left" href="{{ route('accounts') }}" wire:navigate>
-            Volver
-        </x-button>
+<div class="space-y-6">
+
+    {{-- Barra superior: volver + filtro + acciones --}}
+    <div class="bg-dark-800/40 backdrop-blur-sm rounded-xl border border-dark-600/20 p-4 space-y-4">
+
+        {{-- Fila 1: Volver --}}
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <a href="{{ route('accounts') }}" wire:navigate
+                   class="inline-flex items-center gap-2 text-sm font-medium text-dark-300 hover:text-white transition-colors duration-200">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/>
+                    </svg>
+                    Volver
+                </a>
+            </div>
+        </div>
+
+        {{-- Fila 2: Filtro fecha + acciones --}}
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div class="flex flex-wrap gap-2 items-center">
+                <x-date month-year-only wire:model="selectedDate" />
+                <x-button color="primary" icon="magnifying-glass-circle" wire:click="$refresh">Consultar</x-button>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                @can('Crear caja chica')
+                <a href="{{ route('accounts.box.form', ['date_account' => $selectedDate . '-01']) }}"
+                   class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-primary-600 hover:bg-primary-500 transition-all duration-200 shadow-lg shadow-primary-600/20">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                    </svg>
+                    Agregar movimiento
+                </a>
+                @endcan
+                @can('PDF caja chica')
+                <a href="{{ route('account.box.pdf', ['date' => $selectedDate]) }}" target="_blank"
+                   class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-red-300 bg-red-600/10 border border-red-500/20 hover:bg-red-600/20 transition-all duration-200">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+                    </svg>
+                    Descargar PDF
+                </a>
+                @endcan
+            </div>
+        </div>
     </div>
 
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div class="flex gap-2">
-            <x-date month-year-only wire:model="selectedDate" />
-            <x-button color="sky" icon="magnifying-glass-circle" outline wire:click="$refresh">Consultar</x-button>
-        </div>
-        <div class="flex gap-2">
-            <x-button href="{{ route('accounts.box.form', ['date_account' => $selectedDate . '-01']) }}" icon="clipboard-document-list">
-                Agregar movimiento
-            </x-button>
-            <x-button color="red" icon="document-arrow-down" href="{{ route('account.box.pdf') }}" target="_blank">
-                Descargar PDF
-            </x-button>
-        </div>
-    </div>
+    {{-- Tabla de movimientos --}}
+    <div class="rounded-xl bg-dark-800/40 backdrop-blur-sm border border-dark-600/20 overflow-hidden">
 
-    <div class="overflow-hidden dark:ring-dark-600 rounded-lg shadow ring-1 ring-gray-300">
-        <div class="relative soft-scrollbar overflow-auto">
-            <svg class="text-primary-500 dark:text-dark-300 absolute bottom-0 left-0 right-0 top-0 m-auto grid h-10 w-10 animate-spin place-items-center"
-                wire:loading="quantity,search" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-                </circle>
-                <path class="opacity-75" fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                </path>
-            </svg>
+        <div class="relative soft-scrollbar overflow-x-auto">
+            <x-ui.loading-spinner class="text-primary-500 dark:text-dark-300 absolute bottom-0 left-0 right-0 top-0 m-auto h-10 w-10" wire:loading="quantity,search" />
 
-            <table class="dark:divide-dark-500/50 min-w-full divide-y divide-gray-200"
-                wire:loading.class="cursor-not-allowed select-none opacity-25">
+            <table class="min-w-full divide-y divide-dark-600/20"
+                   wire:loading.class="cursor-not-allowed select-none opacity-25">
 
-                <thead class="uppercase bg-gray-50 dark:bg-dark-600">
-                    <tr>
-                        <th scope="col"
-                            class="dark:text-dark-200 px-3 py-3.5 text-left text-sm font-semibold text-gray-700">
-                            Nº
-                        </th>
-                        <th scope="col"
-                            class="dark:text-dark-200 px-3 py-3.5 text-left text-sm font-semibold text-gray-700">
-                            Fecha
-                        </th>
-                        <th scope="col"
-                            class="dark:text-dark-200 px-3 py-3.5 text-left text-sm font-semibold text-gray-700">
-                            DESCRIPCIÓN
-                        </th>
-                        <th scope="col"
-                            class="dark:text-dark-200 px-3 py-3.5 text-left text-sm font-semibold text-gray-700">
-                            DEBE
-                        </th>
-                        <th scope="col"
-                            class="dark:text-dark-200 px-3 py-3.5 text-left text-sm font-semibold text-gray-700">
-                            HABER
-                        </th>
-                        <th scope="col"
-                            class="dark:text-dark-200 px-3 py-3.5 text-left text-sm font-semibold text-gray-700">
-                            SALDO
-                        </th>
-                        <th scope="col"
-                            class="dark:text-dark-200 px-3 py-3.5 text-left text-sm font-semibold text-gray-700">
-                            Opciones
-                        </th>
+                <thead>
+                    {{-- Cabecera columnas --}}
+                    <tr class="bg-dark-700/50">
+                        <th scope="col" class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-dark-300">Nº</th>
+                        <th scope="col" class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-dark-300">Fecha</th>
+                        <th scope="col" class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-dark-300">Descripción</th>
+                        <th scope="col" class="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-emerald-400">Debe</th>
+                        <th scope="col" class="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-red-400">Haber</th>
+                        <th scope="col" class="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-primary-400">Saldo</th>
+                        <th scope="col" class="px-4 py-3.5 text-center text-xs font-semibold uppercase tracking-wider text-dark-300">Opciones</th>
                     </tr>
                 </thead>
-                <tbody class="dark:bg-dark-700 dark:divide-dark-500/20 divide-y divide-gray-200 bg-white">
-                    @foreach ($movements as $movement)
-                        <tr class=" " wire:key="8b700ca168f875b5e2a3c9329ba84d55">
-                            <td class="dark:text-dark-300 whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+
+                <tbody class="divide-y divide-dark-600/10">
+                    @forelse ($movements as $movement)
+                        <tr class="group transition-all duration-200 hover:bg-primary-500/5"
+                            wire:key="8b700ca168f875b5e2a3c9329ba84d55"
+                            style="animation: fade-in-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; animation-delay: {{ $loop->index * 0.03 }}s;">
+                            <td class="whitespace-nowrap px-4 py-3.5 text-sm font-mono text-dark-300">
                                 {{ $movement->type == 'B' ? '' : ($movement->box?->number_label ?? '') }}
                             </td>
-                            <td class="dark:text-dark-300 whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            <td class="whitespace-nowrap px-4 py-3.5 text-sm text-dark-300">
                                 {{ $movement->date }}
                             </td>
-                            <td class="dark:text-dark-300 whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            <td class="whitespace-nowrap px-4 py-3.5 text-sm text-dark-200 max-w-[200px] truncate" title="{{ $movement->description }}">
                                 {{ $movement->description }}
                             </td>
-                            <td class="dark:text-dark-300 whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            <td class="whitespace-nowrap px-4 py-3.5 text-sm text-right font-mono font-medium text-emerald-300">
                                 {{ $movement->type == 'D' ? number_format($movement->amount, 2, '.', ',') : ($movement->type == 'B' ? number_format($movement->amount, 2, '.', ',') : '') }}
                             </td>
-                            <td class="dark:text-dark-300 whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            <td class="whitespace-nowrap px-4 py-3.5 text-sm text-right font-mono font-medium text-red-300">
                                 {{ $movement->type == 'C' ? number_format($movement->amount, 2, '.', ',') : '' }}
                             </td>
-                            <td class="dark:text-dark-300 whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            <td class="whitespace-nowrap px-4 py-3.5 text-sm text-right font-mono font-semibold text-primary-300">
                                 {{ number_format($movement->balance, 2, '.', ',') }}
                             </td>
-                            <td class="dark:text-dark-300 whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            <td class="whitespace-nowrap px-4 py-3.5 text-sm text-center text-dark-300">
                                 @if ($movement->type != 'B')
-                                    <div class="flex gap-1">
-                                        <x-button.circle icon="document" color="red" outline href="{{ route('receipt.box.pdf', $movement->id) }}" />
-
-                                        <x-button.circle icon="pencil" color="blue" light
-                                            wire:click="$dispatch('load::movement', { 'movement' : '{{ $movement->id }}'})" />
-                                        <x-button.circle icon="trash" color="red" light
-                                            onclick="confirmDelete('{{ $movement->id }}')" />
+                                    <div class="flex items-center justify-center gap-1.5">
+                                        @can('PDF caja chica')
+                                        <a href="{{ route('receipt.box.pdf', $movement->id) }}"
+                                           class="p-1.5 rounded-lg text-dark-400 hover:text-red-400 hover:bg-red-600/10 transition-all duration-200"
+                                           title="Descargar PDF">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/>
+                                            </svg>
+                                        </a>
+                                        @endcan
+                                        @can('Editar caja chica')
+                                        <a href="{{ route('accounts.box.form', ['id' => $movement->id, 'date_account' => $selectedDate . '-01']) }}"
+                                           class="p-1.5 rounded-lg text-dark-400 hover:text-blue-400 hover:bg-blue-600/10 transition-all duration-200"
+                                           title="Editar">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"/>
+                                            </svg>
+                                        </a>
+                                        @endcan
+                                        @can('Eliminar caja chica')
+                                        <button onclick="confirmDelete('{{ $movement->id }}')"
+                                                class="p-1.5 rounded-lg text-dark-400 hover:text-red-400 hover:bg-red-600/10 transition-all duration-200 cursor-pointer"
+                                                title="Eliminar">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/>
+                                            </svg>
+                                        </button>
+                                        @endcan
                                     </div>
                                 @endif
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-4 py-16">
+                                <div class="flex flex-col items-center justify-center gap-4 text-center">
+                                    <div class="w-16 h-16 flex items-center justify-center rounded-2xl bg-dark-600/30 border border-dark-500/20">
+                                        <svg class="w-8 h-8 text-dark-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-base font-semibold text-dark-300">Sin movimientos</p>
+                                        <p class="text-sm text-dark-400 mt-1">No hay movimientos registrados para este período.</p>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
 
         </div>
     </div>
-    <div class="mt-4">
+
+    {{-- Paginación --}}
+    <div class="mt-4 flex justify-center">
         <nav role="navigation" aria-label="Pagination Navigation">
             {{ $movements->links() }}
         </nav>

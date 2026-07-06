@@ -77,6 +77,7 @@ class CashBalanceService
         if ($existing) {
             $existing->amount = $amount;
             $existing->save();
+
             return;
         }
 
@@ -98,26 +99,26 @@ class CashBalanceService
             ->exists();
 
         $totalDebit = Movement::where(function ($q) {
-                $q->whereHas('box')->orWhere(function ($q) {
-                    $q->where('type', 'B')->whereDoesntHave('transaction');
-                });
-            })
+            $q->whereHas('box')->orWhere(function ($q) {
+                $q->where('type', 'B')->whereDoesntHave('transaction');
+            });
+        })
             ->whereIn('type', ['D', 'B'])
             ->whereBetween('date', [$from, $to])
             ->sum('amount');
 
         $totalCredit = Movement::where(function ($q) {
-                $q->whereHas('box')->orWhere(function ($q) {
-                    $q->where('type', 'B')->whereDoesntHave('transaction');
-                });
-            })
+            $q->whereHas('box')->orWhere(function ($q) {
+                $q->where('type', 'B')->whereDoesntHave('transaction');
+            });
+        })
             ->where('type', 'C')
             ->whereBetween('date', [$from, $to])
             ->sum('amount');
 
         $balance = (float) ($totalDebit - $totalCredit);
 
-        if (!$hasBalanceInRange) {
+        if (! $hasBalanceInRange) {
             $previousBalance = Movement::where('type', 'B')
                 ->whereDoesntHave('transaction')
                 ->where('date', '<', $from)

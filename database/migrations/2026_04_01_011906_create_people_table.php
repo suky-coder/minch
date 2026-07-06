@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('people', function (Blueprint $table) {
             $table->id();
-            $table->string('ci',15)->unique();
-            $table->string('full_name',150);
-            $table->string('phone',15)->nullable();
+            $table->string('ci', 15)->unique();
+            $table->string('full_name', 150);
+            $table->string('phone', 15)->nullable();
             $table->timestamps();
         });
     }

@@ -280,4 +280,3 @@ return [
         'max_components' => 20,      // Maximum components per batch request
     ],
 ];
-        

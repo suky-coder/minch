@@ -26,10 +26,10 @@ class AccountBoxComponent extends Component
         $end = $start->copy()->endOfMonth();
 
         $movements = Movement::where(function ($q) {
-                $q->whereHas('box')->orWhere(function ($q) {
-                    $q->where('type', 'B')->whereDoesntHave('transaction');
-                });
-            })
+            $q->whereHas('box')->orWhere(function ($q) {
+                $q->where('type', 'B')->whereDoesntHave('transaction');
+            });
+        })
             ->with(['box', 'person'])
             ->whereBetween('date', [$start, $end])
             ->orderBy('date')
@@ -43,6 +43,8 @@ class AccountBoxComponent extends Component
 
     public function delete(Movement $movement)
     {
+        $this->authorize('Eliminar caja chica');
+
         $date = $movement->date;
         $movement->delete();
 

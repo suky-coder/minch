@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 
 class CountHelper
 {
-    function getNextNumberForType($type)
+    public function getNextNumberForType($type)
     {
         return DB::transaction(function () use ($type) {
             $sequence = DB::table('transactions')
@@ -14,7 +14,7 @@ class CountHelper
                 ->lockForUpdate() // Evita duplicados en concurrencia
                 ->first();
 
-            if (!$sequence) {
+            if (! $sequence) {
                 // Inicializar con 0
                 $lastNumber = 0;
                 DB::table('transactions')->insert([
@@ -30,7 +30,7 @@ class CountHelper
                 ->where('type', $type)
                 ->update(['last_number' => $newNumber]);
 
-            return str_pad($newNumber, 8, '0', STR_PAD_LEFT); 
+            return str_pad($newNumber, 8, '0', STR_PAD_LEFT);
         });
     }
 }

@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('accounts', function (Blueprint $table) {
             $table->id();
-            $table->string('name',120);
-            $table->string('account_number',20);
-            $table->string('initials',7)->nullable();
-            $table->string('color',15)->nullable();
-            $table->enum('currency_type',['USD','EUR','BOB']);
+            $table->string('name', 120);
+            $table->string('account_number', 20);
+            $table->string('initials', 7)->nullable();
+            $table->string('color', 15)->nullable();
+            $table->enum('currency_type', ['USD', 'EUR', 'BOB']);
             $table->timestamps();
         });
     }

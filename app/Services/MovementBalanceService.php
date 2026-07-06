@@ -137,7 +137,7 @@ class MovementBalanceService
 
         $balance = (float) ($totalDebit - $totalCredit);
 
-        if (!$hasBalanceInRange) {
+        if (! $hasBalanceInRange) {
             $previousBalance = Movement::query()
                 ->join('transactions', 'movements.id', '=', 'transactions.movement_id')
                 ->where('transactions.account_id', $accountId)

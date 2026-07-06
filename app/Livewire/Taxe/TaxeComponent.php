@@ -3,32 +3,39 @@
 namespace App\Livewire\Taxe;
 
 use App\Models\Taxe;
-use Flux\Flux;
-use Livewire\Component;
-use Livewire\WithPagination;
 use Illuminate\Database\Eloquent\Builder;
-use TallStackUi\Traits\Interactions; 
 use Livewire\Attributes\On;
 use Livewire\Attributes\Validate;
+use Livewire\Component;
+use Livewire\WithPagination;
+use TallStackUi\Traits\Interactions;
 
 class TaxeComponent extends Component
 {
-    use Interactions; 
+    use Interactions;
     use WithPagination;
+
     public $id;
+
     #[Validate('required|min:3|max:150')]
     public $name;
+
     #[Validate('required|min:3|max:6')]
     public $number;
+
     #[Validate('required|min:3|max:6')]
     public $initials;
+
     #[Validate('required|numeric|gte:1.00|lte:99.99')]
     public $applied_discount;
+
     #[Validate('required|not_in:0')]
     public $type;
+
     public ?int $quantity = 10;
 
     public ?string $search = null;
+
     public function with(): array
     {
         return [
@@ -39,22 +46,24 @@ class TaxeComponent extends Component
                 ['index' => 'number', 'label' => 'Numero'],
                 ['index' => 'label', 'label' => 'Tipo'],
                 ['index' => 'applied_discount', 'label' => 'Porcentaje'],
-                ['index' => 'action',],
+                ['index' => 'action'],
             ],
             'rows' => Taxe::query()
                 ->when($this->search, function (Builder $query) {
                     return $query->where('name', 'like', "%{$this->search}%");
                 })
                 ->paginate($this->quantity)
-                ->withQueryString()
+                ->withQueryString(),
         ];
     }
+
     public function render()
     {
         /* $taxes = Taxe::where('name', 'like', '%' . $this->search . '%')->paginate(10); */
 
         return view('livewire.taxe.taxe-component');
     }
+
     public function store()
     {
         $this->validate();
@@ -72,6 +81,7 @@ class TaxeComponent extends Component
 
         $this->clear();
     }
+
     #[On('load::taxe')]
     public function edit(Taxe $taxe)
     {
@@ -81,10 +91,12 @@ class TaxeComponent extends Component
         $this->type = $taxe->type;
         $this->applied_discount = $taxe->applied_discount;
         $this->initials = $taxe->initials;
-        $this->js("window.\$tsui.open.modal('modal-id')");
+        $this->js("window.\$tsui.open.modal('crud-modal')");
     }
+
     public function update()
     {
+        $this->validate();
         $taxe = Taxe::find($this->id);
         $taxe->update([
             'name' => $this->name,
@@ -99,6 +111,7 @@ class TaxeComponent extends Component
             ->send();
         $this->clear();
     }
+
     public function delete(Taxe $taxe)
     {
         $taxe->delete();
@@ -107,6 +120,7 @@ class TaxeComponent extends Component
             ->success('Registro eliminado', 'El impuesto fue eliminado correctamente')
             ->send();
     }
+
     public function clear()
     {
         $this->resetValidation();
@@ -114,6 +128,7 @@ class TaxeComponent extends Component
         $this->dispatch('close-modal');
 
     }
+
     public function updatedSearch()
     {
         $this->resetPage();

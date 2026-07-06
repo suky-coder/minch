@@ -1,10 +1,8 @@
 <?php
 
+use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Models\Supplier;
-use App\Models\Transaction;
-use Illuminate\Database\Eloquent\Builder;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -16,7 +14,7 @@ Route::get('/suppliers/search', function (Request $request) {
         ->limit(10)
         ->get(['ci', 'full_name']); // Traemos CI y nombre
 
-    return $suppliers->map(fn($s) => [
+    return $suppliers->map(fn ($s) => [
         'label' => "{$s->ci} - {$s->full_name}",
         'value' => $s->ci, // Importante: el value es el CI
     ]);

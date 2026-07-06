@@ -16,25 +16,52 @@ trait ProfileValidationRules
     {
         return [
             'name' => $this->nameRules(),
+            'last_name' => $this->lastNameRules(),
+            'ci' => $this->ciRules($userId),
             'email' => $this->emailRules($userId),
+            'phone' => $this->phoneRules(),
+            'gender' => $this->genderRules(),
+            'birthdate' => $this->birthdateRules(),
         ];
     }
 
-    /**
-     * Get the validation rules used to validate user names.
-     *
-     * @return array<int, \Illuminate\Contracts\Validation\Rule|array<mixed>|string>
-     */
     protected function nameRules(): array
     {
-        return ['required', 'string', 'max:255'];
+        return ['required', 'string', 'max:150'];
     }
 
-    /**
-     * Get the validation rules used to validate user emails.
-     *
-     * @return array<int, \Illuminate\Contracts\Validation\Rule|array<mixed>|string>
-     */
+    protected function lastNameRules(): array
+    {
+        return ['required', 'string', 'max:150'];
+    }
+
+    protected function ciRules(?int $userId = null): array
+    {
+        return [
+            'required',
+            'string',
+            'max:15',
+            $userId === null
+                ? Rule::unique(User::class)
+                : Rule::unique(User::class)->ignore($userId),
+        ];
+    }
+
+    protected function phoneRules(): array
+    {
+        return ['required', 'string', 'max:10'];
+    }
+
+    protected function genderRules(): array
+    {
+        return ['required', 'in:M,F'];
+    }
+
+    protected function birthdateRules(): array
+    {
+        return ['required', 'date'];
+    }
+
     protected function emailRules(?int $userId = null): array
     {
         return [

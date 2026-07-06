@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Person extends Model
 {
-     protected $fillable = ['ci', 'full_name', 'phone'];
+    protected $fillable = ['ci', 'full_name', 'phone'];
 
-     public function supplier()
+    public function supplier()
     {
         return $this->hasOne(Supplier::class);
     }

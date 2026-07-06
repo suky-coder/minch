@@ -4,20 +4,44 @@ namespace App\Livewire\Transactions;
 
 use App\Models\Account;
 use App\Models\Movement;
-use App\Models\Transaction;
 use App\Models\Supplier;
+use App\Models\Transaction;
 use App\Services\MovementBalanceService;
 use Carbon\Carbon;
-use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\Component;
 use TallStackUi\Traits\Interactions;
 
 class ViewComponent extends Component
 {
     use Interactions;
 
-    public $start, $end, $dateT, $account, $moneda;
-    public $idAccount, $amount, $id, $type, $date, $doc, $description, $payment_type;
+    public $start;
+
+    public $end;
+
+    public $dateT;
+
+    public $account;
+
+    public $moneda;
+
+    public $idAccount;
+
+    public $amount;
+
+    public $id;
+
+    public $type;
+
+    public $date;
+
+    public $doc;
+
+    public $description;
+
+    public $payment_type;
+
     public $person_id; // <-- Nuevo campo para el proveedor
 
     public function mount($id, $date)
@@ -25,7 +49,7 @@ class ViewComponent extends Component
         $this->date = $date;
         $this->dateT = Carbon::createFromFormat('Y-m', $date);
         Carbon::setLocale('es');
-        $this->dateT = ucfirst($this->dateT->translatedFormat('F')) . ' ' . $this->dateT->format('Y');
+        $this->dateT = ucfirst($this->dateT->translatedFormat('F')).' '.$this->dateT->format('Y');
 
         $account = Account::find($id);
         $this->account = $account->account_number;
@@ -40,15 +64,15 @@ class ViewComponent extends Component
         $transactions = Movement::whereHas('transaction', function ($query) {
             $query->where('account_id', $this->idAccount);
         })
-        ->with(['transaction' => function ($query) {
-            $query->where('account_id', $this->idAccount);
-        }, 'person']) // Cargar la persona relacionada
-        ->whereBetween('date', [$this->start, $this->end])
-        ->orderBy('date')
-        ->orderBy('id')
-        ->select('*')
-        ->selectRaw('SUM(CASE WHEN type IN ("D", "B") THEN amount ELSE -amount END) OVER (ORDER BY date, id) as balance')
-        ->paginate(10);
+            ->with(['transaction' => function ($query) {
+                $query->where('account_id', $this->idAccount);
+            }, 'person']) // Cargar la persona relacionada
+            ->whereBetween('date', [$this->start, $this->end])
+            ->orderBy('date')
+            ->orderBy('id')
+            ->select('*')
+            ->selectRaw('SUM(CASE WHEN type IN ("D", "B") THEN amount ELSE -amount END) OVER (ORDER BY date, id) as balance')
+            ->paginate(10);
 
         // Obtener lista de proveedores para el selector (todos los que tienen persona)
         $suppliers = Supplier::with('person')->get();
@@ -70,7 +94,7 @@ class ViewComponent extends Component
         $this->description = $movement->description;
         $this->person_id = $movement->person_id;
 
-        $this->js("window.\$tsui.open.modal('modal-id')");
+        $this->js("window.\$tsui.open.modal('crud-modal')");
     }
 
     public function update()

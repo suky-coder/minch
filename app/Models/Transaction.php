@@ -16,7 +16,9 @@ class Transaction extends Model
     {
         static::creating(function ($model) {
             $movement = Movement::find($model->movement_id);
-            if (!$movement) return;
+            if (! $movement) {
+                return;
+            }
 
             $date = Carbon::parse($movement->date);
             $type = $movement->type;
@@ -37,46 +39,52 @@ class Transaction extends Model
             $model->number = ($maxNumber ?? 0) + 1;
         });
     }
+
     public function account(): BelongsTo
     {
         return $this->belongsTo(Account::class);
     }
+
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
     }
+
     public function movement(): BelongsTo
     {
         return $this->belongsTo(Movement::class);
     }
+
     public function getcalculateLabelAttribute()
     {
         $literal = NumberHelper::toLiteral($this->amount);
+
         return $literal;
     }
+
     public function getdateLabelAttribute()
     {
         Carbon::setLocale('es');
 
         $fecha = Carbon::parse($this->date);
         $literal = $fecha->translatedFormat('d \d\\e F \d\\e Y');
+
         return $literal;
     }
-
-
-
-
 
     public function getFormattedLastNumberAttribute(): string
     {
         return str_pad($this->number, 8, '0', STR_PAD_LEFT);
     }
+
     public function getNumberLabelAttribute(): string
     {
         if ($this->number_check) {
             $prefix = $this->payment_type === 'T' ? 'T-' : 'CH-';
-            return $prefix . $this->number_check;
+
+            return $prefix.$this->number_check;
         }
-        return 'DOC-' . str_pad($this->number, 8, '0', STR_PAD_LEFT);
+
+        return 'DOC-'.str_pad($this->number, 8, '0', STR_PAD_LEFT);
     }
 }

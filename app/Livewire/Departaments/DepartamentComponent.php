@@ -2,24 +2,28 @@
 
 namespace App\Livewire\Departaments;
 
-use App\Models\Account;
 use App\Models\Departament;
-use App\Models\User;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\On;
 use TallStackUi\Traits\Interactions;
 
 class DepartamentComponent extends Component
 {
-    use WithPagination, Interactions;
+    use Interactions, WithPagination;
 
     public $departamentId;
+
     public $area;
+
     public $description;
+
     public $account_id;
+
     public $user_id;
+
     public ?int $quantity = 10;
+
     public ?string $search = null;
 
     protected function rules()
@@ -28,7 +32,7 @@ class DepartamentComponent extends Component
             'area' => 'required|string|max:150',
             'description' => 'required|string|max:255',
             'account_id' => 'required|exists:accounts,id',
-            'user_id' => 'required|exists:users,id|unique:departaments,user_id,' . $this->departamentId,
+            'user_id' => 'required|exists:users,id|unique:departaments,user_id,'.$this->departamentId,
         ];
     }
 
@@ -44,12 +48,12 @@ class DepartamentComponent extends Component
 
         $rows = $departaments->through(function ($departament) {
             return (object) [
-                'id'          => $departament->id,
-                'area'        => $departament->area,
+                'id' => $departament->id,
+                'area' => $departament->area,
                 'description' => $departament->description,
-                'account'     => $departament->account?->name ?? '',
-                'user'        => $departament->user?->name ?? '',
-                'model'       => $departament,
+                'account' => $departament->account?->name ?? '',
+                'user' => $departament->user?->name ?? '',
+                'model' => $departament,
             ];
         });
 
@@ -73,6 +77,8 @@ class DepartamentComponent extends Component
 
     public function store()
     {
+        $this->authorize('Crear departamentos');
+
         $this->validate();
 
         Departament::create([
@@ -98,11 +104,13 @@ class DepartamentComponent extends Component
         $this->description = $departament->description;
         $this->account_id = $departament->account_id;
         $this->user_id = $departament->user_id;
-        $this->js("window.\$tsui.open.modal('modal-id')");
+        $this->js("window.\$tsui.open.modal('crud-modal')");
     }
 
     public function update()
     {
+        $this->authorize('Editar departamentos');
+
         $this->validate();
 
         $departament = Departament::find($this->departamentId);
@@ -124,6 +132,8 @@ class DepartamentComponent extends Component
 
     public function delete($id)
     {
+        $this->authorize('Eliminar departamentos');
+
         $id = is_array($id) ? $id[0] : $id;
         $departament = Departament::findOrFail($id);
         $departament->delete();

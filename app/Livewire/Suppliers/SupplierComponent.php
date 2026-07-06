@@ -1,27 +1,32 @@
 <?php
 
 // app/Livewire/Suppliers/SupplierComponent.php
+
 namespace App\Livewire\Suppliers;
 
 use App\Models\Person;
 use App\Models\Supplier;
-use Flux\Flux;
-use Livewire\Component;
-use Livewire\WithPagination;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
+use Livewire\Component;
+use Livewire\WithPagination;
 use TallStackUi\Traits\Interactions;
 
 class SupplierComponent extends Component
 {
-    use WithPagination, Interactions;
+    use Interactions, WithPagination;
 
     public $supplierId;          // ID del proveedor en edición
+
     public $full_name;
+
     public $ci;
+
     public $description;         // Nuevo campo
+
     public ?int $quantity = 10;
+
     public ?string $search = null;
 
     // Reglas de validación
@@ -33,49 +38,50 @@ class SupplierComponent extends Component
                 'required',
                 'min:4',
                 'max:15',
-                Rule::unique('people', 'ci')->ignore($this->supplierId, 'id') // Ignora el CI de la persona actual
+                Rule::unique('people', 'ci')->ignore($this->supplierId, 'id'), // Ignora el CI de la persona actual
             ],
             'description' => 'required|max:255',
         ];
     }
 
     // Datos para la tabla
-   public function with(): array
-{
-    $suppliers = Supplier::query()
-        ->with('person') // Eager loading
-        ->when($this->search, function (Builder $query) {
-            return $query->whereHas('person', function ($q) {
-                $q->where('full_name', 'like', "%{$this->search}%")
-                  ->orWhere('ci', 'like', "%{$this->search}%");
-            });
-        })
-        ->paginate($this->quantity)
-        ->withQueryString();
+    public function with(): array
+    {
+        $suppliers = Supplier::query()
+            ->with('person') // Eager loading
+            ->when($this->search, function (Builder $query) {
+                return $query->whereHas('person', function ($q) {
+                    $q->where('full_name', 'like', "%{$this->search}%")
+                        ->orWhere('ci', 'like', "%{$this->search}%");
+                });
+            })
+            ->paginate($this->quantity)
+            ->withQueryString();
 
-    // Transformamos cada Supplier en un objeto con las propiedades necesarias
-    $rows = $suppliers->through(function ($supplier) {
-        return (object) [
-            'id'          => $supplier->id,
-            'ci'          => $supplier->person->ci ?? '',
-            'full_name'   => $supplier->person->full_name ?? '',
-            'description' => $supplier->description,
-            // Guardamos el modelo original para usarlo en acciones (eliminar, editar)
-            'model'       => $supplier,
+        // Transformamos cada Supplier en un objeto con las propiedades necesarias
+        $rows = $suppliers->through(function ($supplier) {
+            return (object) [
+                'id' => $supplier->id,
+                'ci' => $supplier->person->ci ?? '',
+                'full_name' => $supplier->person->full_name ?? '',
+                'description' => $supplier->description,
+                // Guardamos el modelo original para usarlo en acciones (eliminar, editar)
+                'model' => $supplier,
+            ];
+        });
+
+        return [
+            'headers' => [
+                ['index' => 'id', 'label' => '#'],
+                ['index' => 'ci', 'label' => 'CI'],
+                ['index' => 'full_name', 'label' => 'Nombre Completo'],
+                ['index' => 'description', 'label' => 'Descripción'],
+                ['index' => 'action', 'label' => 'Acciones'],
+            ],
+            'rows' => $rows,
         ];
-    });
+    }
 
-    return [
-        'headers' => [
-            ['index' => 'id', 'label' => '#'],
-            ['index' => 'ci', 'label' => 'CI'],
-            ['index' => 'full_name', 'label' => 'Nombre Completo'],
-            ['index' => 'description', 'label' => 'Descripción'],
-            ['index' => 'action', 'label' => 'Acciones'],
-        ],
-        'rows' => $rows,
-    ];
-}
     public function render()
     {
         return view('livewire.suppliers.supplier-component');
@@ -84,6 +90,8 @@ class SupplierComponent extends Component
     // Crear nuevo proveedor
     public function store()
     {
+        $this->authorize('Crear proveedores');
+
         $this->validate();
 
         // Crear la persona
@@ -114,12 +122,14 @@ class SupplierComponent extends Component
         $this->description = $supplier->description;
         $this->full_name = $supplier->person->full_name;
         $this->ci = $supplier->person->ci;
-        $this->js("window.\$tsui.open.modal('modal-id')");
+        $this->js("window.\$tsui.open.modal('crud-modal')");
     }
 
     // Actualizar proveedor
     public function update()
     {
+        $this->authorize('Editar proveedores');
+
         $this->validate();
 
         $supplier = Supplier::with('person')->find($this->supplierId);
@@ -146,6 +156,8 @@ class SupplierComponent extends Component
     // Eliminar proveedor (incluye la persona en cascada por la FK)
     public function delete(Supplier $supplier)
     {
+        $this->authorize('Eliminar proveedores');
+
         $supplier->delete(); // Como la FK tiene onDelete('cascade'), elimina la persona también
         $this->toast()
             ->expandable(false)

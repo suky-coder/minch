@@ -58,12 +58,14 @@ class Movement extends Model
 
         return $this->person;
     }
+
     public function getdateLabelAttribute()
     {
         Carbon::setLocale('es');
 
         $fecha = Carbon::parse($this->date);
         $literal = $fecha->translatedFormat('d \d\\e F \d\\e Y');
+
         return $literal;
     }
 }

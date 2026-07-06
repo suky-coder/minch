@@ -2,17 +2,19 @@
 
 namespace App\Livewire;
 
-
 use App\Models\Person;
-use Livewire\Component;
 use Livewire\Attributes\Modelable;
+use Livewire\Component;
 
 class SupplierSearch extends Component
 {
     #[Modelable]
     public $ci = '';
+
     public $searchTerm = '';
+
     public $filteredSuppliers = [];
+
     public $showList = false;
 
     public function mount($ci = null)
@@ -26,6 +28,7 @@ class SupplierSearch extends Component
         $search = trim($this->searchTerm);
         if (strlen($search) < 2) {
             $this->filteredSuppliers = [];
+
             return;
         }
 
@@ -39,7 +42,9 @@ class SupplierSearch extends Component
     public function selectSupplier($id)
     {
         $person = Person::find($id);
-        if (!$person) return;
+        if (! $person) {
+            return;
+        }
 
         $this->ci = $person->ci;
         $this->searchTerm = $person->ci;
@@ -64,7 +69,7 @@ class SupplierSearch extends Component
         usleep(200000);
         $this->showList = false;
         // Si el usuario escribió manualmente y no seleccionó, asignamos el CI
-        if (empty($this->ci) && !empty($this->searchTerm)) {
+        if (empty($this->ci) && ! empty($this->searchTerm)) {
             $this->ci = $this->searchTerm;
             $this->dispatch('supplier-ci-manual', ['ci' => $this->ci]);
         }

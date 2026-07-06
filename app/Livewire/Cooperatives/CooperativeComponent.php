@@ -11,17 +11,30 @@ use TallStackUi\Traits\Interactions;
 
 class CooperativeComponent extends Component
 {
-    use WithPagination, Interactions;
-    public $id = 0, $search = '', $quantity = 10;
-    public
-        $name = '',
-        $concession = '',
-        $mine = '',
-        $municipality = '',
-        $NIM = '',
-        $NIT = '',
-        $contribution = 0.0,
-        $comibol = 0.0;
+    use Interactions, WithPagination;
+
+    public $id = 0;
+
+    public $search = '';
+
+    public $quantity = 10;
+
+    public $name = '';
+
+    public $concession = '';
+
+    public $mine = '';
+
+    public $municipality = '';
+
+    public $NIM = '';
+
+    public $NIT = '';
+
+    public $contribution = 0.0;
+
+    public $comibol = 0.0;
+
     public function with(): array
     {
         return [
@@ -33,7 +46,7 @@ class CooperativeComponent extends Component
                 ['index' => 'concession', 'label' => 'concession'],
                 ['index' => 'mine', 'label' => 'vocamina'],
                 ['index' => 'municipality', 'label' => 'municipio'],
-                ['index' => 'action',],
+                ['index' => 'action'],
             ],
             'rows' => Cooperative::query()
                 ->when($this->search, function (Builder $query) {
@@ -42,16 +55,34 @@ class CooperativeComponent extends Component
                         ->orWhere('NIM', 'like', "%{$this->search}%");
                 })
                 ->paginate($this->quantity)
-                ->withQueryString()
+                ->withQueryString(),
         ];
     }
+
+    protected function rules()
+    {
+        return [
+            'name' => 'required|string|max:200',
+            'concession' => 'required|string|max:250',
+            'mine' => 'required|string|max:250',
+            'municipality' => 'required|string|max:150',
+            'NIM' => 'required|string|max:200',
+            'NIT' => 'required|string|max:200',
+            'contribution' => 'required|numeric|gte:0|lte:99.99',
+            'comibol' => 'required|numeric|gte:0|lte:99.99',
+        ];
+    }
+
     public function render()
     {
         return view('livewire.cooperatives.cooperative-component');
     }
+
     public function store()
     {
-      /*   $this->validate(); */
+        $this->authorize('Crear cooperativas');
+
+        $this->validate();
         Cooperative::create([
             'name' => $this->name,
             'concession' => $this->concession,
@@ -68,6 +99,7 @@ class CooperativeComponent extends Component
             ->send();
         $this->clear();
     }
+
     #[On('load::cooperative')]
     public function edit(Cooperative $cooperative)
     {
@@ -80,11 +112,14 @@ class CooperativeComponent extends Component
         $this->contribution = $cooperative->contribution;
         $this->comibol = $cooperative->comibol;
         $this->id = $cooperative->id;
-        $this->js("window.\$tsui.open.modal('modal-id')");
+        $this->js("window.\$tsui.open.modal('crud-modal')");
     }
+
     public function update()
     {
-       /*  $this->validate(); */
+        $this->authorize('Editar cooperativas');
+
+        $this->validate();
         $taxe = Cooperative::find($this->id);
         $taxe->update([
             'name' => $this->name,
@@ -102,29 +137,34 @@ class CooperativeComponent extends Component
             ->send();
         $this->clear();
     }
+
     public function delete(Cooperative $supplier)
     {
+        $this->authorize('Eliminar cooperativas');
+
         $supplier->delete();
         $this->toast()
             ->expandable(false)
             ->success('Registro eliminado', 'La Cooperativa fue eliminado correctamente')
             ->send();
     }
+
     public function clear()
     {
         $this->resetValidation();
         $this->dispatch('close-modal');
         $this->reset([
-'name',
-'concession',
-'mine',
-'municipality',
-'NIM',
-'NIT',
-'contribution',
-'comibol'   
+            'name',
+            'concession',
+            'mine',
+            'municipality',
+            'NIM',
+            'NIT',
+            'contribution',
+            'comibol',
         ]);
     }
+
     public function updatedSearch()
     {
         $this->resetPage();

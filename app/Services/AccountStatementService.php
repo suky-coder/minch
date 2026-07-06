@@ -43,7 +43,7 @@ class AccountStatementService
 
     public function totalsForPerson(int $personId): array
     {
-        $amountD = (float) Movement::where('person_id', $personId)->where('type', 'D')->sum('amount');
+        $amountD = (float) Movement::where('person_id', $personId)->whereIn('type', ['D', 'B'])->sum('amount');
         $amountC = (float) Movement::where('person_id', $personId)->where('type', 'C')->sum('amount');
 
         return [

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('retentions', function (Blueprint $table) {
             $table->id();
-             $table->text('description');
+            $table->text('description');
             $table->string('summary', 255);
             $table->decimal('amount', 12, 2);
             $table->integer('code');

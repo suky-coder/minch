@@ -229,6 +229,7 @@
                 <td colspan="2" rowspan="3" width="450px" align="center">
                     <strong style="font-size: 16px">LIBRO DE CAJA <br>
                     </strong>
+                    <span style="font-size: 11px;">{{ $periodLabel ?? '' }}</span>
                     <br>
                     <span>(EXPRESADO EN BOLIVIANOS)</span>
                 </td>

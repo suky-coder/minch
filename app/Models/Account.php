@@ -8,12 +8,15 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Account extends Model
 {
-    protected $guarded=['id'];
-    public function transactions():HasMany{
+    protected $guarded = ['id'];
+
+    public function transactions(): HasMany
+    {
         return $this->hasMany(Transaction::class);
     }
-    
-    public function movements():HasManyThrough{
+
+    public function movements(): HasManyThrough
+    {
         return $this->hasManyThrough(
             Movement::class,
             Transaction::class,

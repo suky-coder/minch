@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->enum('payment_type', ['CH', 'T'])->default('CH');
             $table->unsignedBigInteger('number');
-            $table->string('number_check',20)->nullable();   
+            $table->string('number_check', 20)->nullable();
             $table->unsignedBigInteger('account_id');
             $table->unsignedBigInteger('movement_id');
             $table->timestamps();
@@ -23,6 +23,7 @@ return new class extends Migration
             $table->foreign('movement_id')->references('id')->on('movements')->onDelete('cascade');
         });
     }
+
     public function down(): void
     {
         Schema::dropIfExists('transactions');

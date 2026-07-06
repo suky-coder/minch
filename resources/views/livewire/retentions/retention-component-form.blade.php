@@ -75,7 +75,7 @@
                             <template x-for="(taxe, index) in taxes" :key="index">
                                 <div class="col-12">
                                     <x-card>
-                                        <form id="user-create" wire:submit="save" class="space-y-2">
+            <form id="user-create" wire:submit="save" class="space-y-2" x-on:keydown.cmd.enter="$wire.{{ $this->id ? 'update' : 'store' }}()">
 
                                             <div class="flex flex-col sm:flex-row gap-4">
                                                 <div class="w-full sm:w-1/2">
@@ -121,11 +121,21 @@
                         <x-button wire:navigate href="{{ route('retentions') }}" text="Cancelar" icon="x-mark"
                             color="secondary" />
                         @if ($this->id)
-                            <x-button wire:click.prevent="update()" wire:loading.attr="disabled" text="Actualizar"
-                                icon="clipboard-document" color="fuchsia" outline />
+                            <x-button wire:click.prevent="update()" wire:loading.attr="disabled" wire:target="update"
+                                icon="clipboard-document" color="fuchsia" outline>
+                                <span wire:loading.remove wire:target="update">Actualizar</span>
+                                <span wire:loading wire:target="update" class="flex items-center gap-2">
+                                    <x-ui.loading-spinner class="h-4 w-4" /> Guardando...
+                                </span>
+                            </x-button>
                         @else
-                            <x-button wire:click.prevent="store()" wire:loading.attr="disabled" text="Guardar"
-                                icon="archive-box-arrow-down" color="fuchsia" outline />
+                            <x-button wire:click.prevent="store()" wire:loading.attr="disabled" wire:target="store"
+                                icon="archive-box-arrow-down" color="fuchsia" outline>
+                                <span wire:loading.remove wire:target="store">Guardar</span>
+                                <span wire:loading wire:target="store" class="flex items-center gap-2">
+                                    <x-ui.loading-spinner class="h-4 w-4" /> Guardando...
+                                </span>
+                            </x-button>
                         @endif
                     </div>
                 </x-slot:footer>

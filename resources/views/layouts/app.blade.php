@@ -8,10 +8,7 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700&display=swap" rel="stylesheet" />
 
     <script>
         (function() {
@@ -38,7 +35,7 @@
     @vite('resources/js/app.js')
 </head>
 
-<body class="font-sans antialiased bg-gray-100 dark:bg-dark-900" x-cloak x-data="{ name: @js(auth()->user()->name) }" x-on:name-updated.window="name = $event.detail.name">
+<body class="app-layout font-sans antialiased bg-gray-100 dark:bg-dark-900" x-cloak x-data="{ name: @js(auth()->user()->name) }" x-on:name-updated.window="name = $event.detail.name">
     <x-layout>
         <x-slot:top>
             <x-dialog />
@@ -62,7 +59,7 @@
                         <x-dropdown>
                             <x-slot:action>
                                 <button class="flex items-center gap-2 cursor-pointer rounded-full p-1 hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors duration-200" x-on:click="show = !show">
-                                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-700 text-white text-sm font-bold" x-text="name ? name.charAt(0).toUpperCase() : '?'"></span>
+                                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-600 text-white text-sm font-bold" x-text="name ? name.charAt(0).toUpperCase() : '?'"></span>
                                     <span class="text-sm font-semibold text-gray-700 dark:text-dark-200 hidden sm:block" x-text="name"></span>
                                     <x-icon name="chevron-down" class="h-4 w-4 text-gray-400 dark:text-dark-300" />
                                 </button>
@@ -87,18 +84,18 @@
         <x-slot:menu>
             <x-side-bar smart collapsible thin-scroll>
                 <x-slot:brand>
-                    <div class="px-4 py-6 flex flex-col items-center justify-center border-b border-gray-200 dark:border-dark-700">
-                        <img src="{{ asset('image/logo.png') }}" width="140" height="140" alt="Logo" class="mb-3" />
-                        <h1 class="font-sans text-xl font-bold text-center tracking-wide text-primary-700 dark:text-primary-400 leading-tight">
-                            Empresa MINCH SRL.
+                    <div class="px-5 py-5 flex flex-col items-center justify-center border-b border-gray-200 dark:border-dark-700">
+                        <img src="{{ asset('image/logo.png') }}" width="100" height="100" alt="Logo" class="mb-3" />
+                        <h1 class="font-sans text-lg font-bold text-center tracking-tight text-gray-900 dark:text-white leading-tight">
+                            MINCH SRL.
                         </h1>
-                        <p class="text-xs text-gray-500 dark:text-dark-400 mt-1">Sistema de Gestión</p>
+                        <p class="text-[11px] text-gray-500 dark:text-dark-400 mt-0.5">Sistema de Gestión</p>
                     </div>
                 </x-slot:brand>
                 <x-slot:brand-collapsed>
-                    <div class="mt-4 mb-2 flex flex-col items-center justify-center">
-                        <img src="{{ asset('image/logo.png') }}" width="50" height="50" alt="Logo" class="mb-1" />
-                        <h1 class="text-primary-600 dark:text-primary-400 text-[10px] text-center font-bold leading-tight">
+                    <div class="mt-5 mb-3 flex flex-col items-center justify-center">
+                        <img src="{{ asset('image/logo.png') }}" width="44" height="44" alt="Logo" class="mb-1" />
+                        <h1 class="text-gray-700 dark:text-dark-200 text-[10px] text-center font-bold leading-tight">
                             MINCH
                         </h1>
                     </div>
@@ -116,41 +113,64 @@
                     <x-side-bar.item text="Permisos" icon="key" :route="route('permissions')" wire:navigate/>
                     @endcan
                 </x-side-bar.item>
+                @can('Ver impuestos')
                 <x-side-bar.item text="Impuestos" icon="percent-badge" :route="route('taxes')" wire:navigate />
+                @endcan
+                @can('Ver proveedores')
                 <x-side-bar.item text="Proveedores" icon="truck" :route="route('suppliers')" wire:navigate />
+                @endcan
+                @can('Ver clientes')
                 <x-side-bar.item text="Clientes" icon="users" :route="route('customers')" wire:navigate />
+                @endcan
+                {{-- @can('Ver departamentos')
                 <x-side-bar.item text="Departamentos" icon="building-office-2" :route="route('departments')" wire:navigate />
+                @endcan --}}
+                @can('Ver cooperativas')
                 <x-side-bar.item text="Cooperativas" icon="building-storefront" :route="route('cooperatives')" wire:navigate />
+                @endcan
+               {{--  @can('Ver cotizaciones')
+                <x-side-bar.item text="Cotizaciones" icon="currency-dollar" :route="route('cotizaciones')" wire:navigate />
+                @endcan --}}
+                @can('Ver cuentas')
                 <x-side-bar.item text="Cuentas" icon="clipboard-document-check" :route="route('accounts')" wire:navigate />
+                @endcan
+                @can('Ver retenciones')
                 <x-side-bar.item text="Retenciones" icon="hand-raised" :route="route('retentions')" wire:navigate />
+                @endcan
                 <x-side-bar.separator line text="Finanzas" />
                 <x-side-bar.item text="Tesoreria" icon="credit-card">
                     @can('Ver libro de bancos')
                     <x-side-bar.item text="Libro de bancos" icon="book-open" :route="route('transactions')" wire:navigate />
                     @endcan
+                    @can('Ver caja chica')
                     <x-side-bar.item text="Libro de cajas" icon="archive-box" :route="route('accounts.box')" wire:navigate />
+                    @endcan
                     @can('Ver estados de cuenta')
                     <x-side-bar.item text="Estado de cuenta" icon="document-text" :route="route('accounts.statement')" wire:navigate />
                     @endcan
                 </x-side-bar.item>
-                <x-side-bar.item text="Liquidaciones" icon="calculator" :route="route('liquidation.form')" wire:navigate />
+{{--                 <x-side-bar.item text="Liquidaciones" icon="calculator" :route="route('liquidation.form')" wire:navigate />
+ --}}                @can('Ver reportes')
                 <x-side-bar.separator line text="Reportes" />
                 <x-side-bar.item text="Reportes" icon="chart-bar">
-                    <x-side-bar.item text="Retenciones" icon="document-arrow-down" :route="route('retentions')" wire:navigate />
-                    <x-side-bar.item text="Caja" icon="archive-box" :route="route('accounts.box')" wire:navigate />
-                </x-side-bar.item>
+                    <x-side-bar.item text="Retenciones" icon="document-arrow-down" :route="route('reports.retentions')" wire:navigate />
+                    <x-side-bar.item text="Caja" icon="archive-box" :route="route('reports.box')" wire:navigate />
+                    <x-side-bar.item text="Banco" icon="book-open" :route="route('reports.bank-book')" wire:navigate />
+{{--                     <x-side-bar.item text="Liquidaciones" icon="calculator" :route="route('reports.liquidations')" wire:navigate />
+ --}}                </x-side-bar.item>
+                @endcan
             </x-side-bar>
         </x-slot:menu>
-        {{ $slot }}     
+        <div wire:navigate.main class="page-enter">
+            {{ $slot }}
+        </div>
     </x-layout>
     @livewireScripts
     
 </body>
 <script>
     function confirmDelete(id) {
-        const wireEl = document.querySelector('[wire\\:id]');
-        if (!wireEl) return;
-        const component = Livewire.find(wireEl.getAttribute('wire:id'));
+        const component = Livewire.getByName('nombre-de-tu-componente')[0];
 
         $tsui.interaction('dialog')
             .wireable(component)
