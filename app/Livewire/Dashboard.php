@@ -60,12 +60,11 @@ class Dashboard extends Component
         ];
 
         // ── Balance per account ──
-        $accounts = Account::with('transactions.movement')->get();
+        $accounts = Account::with('movements')->get();
         $balanceByAccount = [];
         foreach ($accounts as $account) {
-            $debit = $account->transactions->flatMap->movement->where('type', 'D')->sum('amount')
-                + $account->transactions->flatMap->movement->where('type', 'B')->sum('amount');
-            $credit = $account->transactions->flatMap->movement->where('type', 'C')->sum('amount');
+            $debit = $account->movements->whereIn('type', ['D', 'B'])->sum('amount');
+            $credit = $account->movements->where('type', 'C')->sum('amount');
             $balanceByAccount[$account->name] = $debit - $credit;
         }
 

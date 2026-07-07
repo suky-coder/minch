@@ -24,11 +24,18 @@ class MoreDataSeeder extends Seeder
         $taxes = Taxe::all();
         $suppliers = Supplier::with('person')->get();
         $accounts = Account::all();
+        $allPeople = Person::all();
 
-        // ─── 50 Retentions ───
-        $retentionTypes = ['S', 'G'];
-        $statuses = ['0', '1'];
-        $descriptions = [
+        if ($suppliers->isEmpty() || $taxes->isEmpty() || $accounts->isEmpty()) {
+            $this->command->warn('Ejecuta primero los seeders base (TaxeSeeder, PermissionSeeder, DemoDataSeeder).');
+            return;
+        }
+
+        $now = Carbon::now();
+        $months = collect([$now->copy()->subMonth(), $now]);
+
+        // ─── Retentions (15 per month) ───
+        $retentionDescriptions = [
             'RETENCIÓN POR SERVICIOS DE INGENIERÍA',
             'RETENCIÓN POR COMPRA DE REPUESTOS',
             'RETENCIÓN POR SERVICIOS DE AUDITORÍA',
@@ -44,77 +51,51 @@ class MoreDataSeeder extends Seeder
             'RETENCIÓN POR SERVICIOS DE TOPOGRAFÍA',
             'RETENCIÓN POR COMPRA DE LABORATORIO',
             'RETENCIÓN POR SERVICIOS DE SEGUROS',
-            'RETENCIÓN POR COMPRA DE EQUIPO MÉDICO',
-            'RETENCIÓN POR SERVICIOS DE TRADUCCIÓN',
-            'RETENCIÓN POR MANTENIMIENTO DE VEHÍCULOS',
-            'RETENCIÓN POR SERVICIOS DE CATERING',
-            'RETENCIÓN POR COMPRA DE MOBILIARIO',
-            'RETENCIÓN POR SERVICIOS DE DISEÑO GRÁFICO',
-            'RETENCIÓN POR COMPRA DE ROPA DE TRABAJO',
-            'RETENCIÓN POR SERVICIOS DE JARDINERÍA',
-            'RETENCIÓN POR COMPRA DE EQUIPO DE CÓMPUTO',
-            'RETENCIÓN POR SERVICIOS DE FUMIGACIÓN',
-            'RETENCIÓN POR COMPRA DE CÁMARAS',
-            'RETENCIÓN POR SERVICIOS DE MENSAJERÍA',
-            'RETENCIÓN POR ALQUILER DE OFICINAS',
-            'RETENCIÓN POR SERVICIOS DE RECURSOS HUMANOS',
-            'RETENCIÓN POR COMPRA DE SEÑALIZACIÓN',
-            'RETENCIÓN POR SERVICIOS DE LAVANDERÍA',
-            'RETENCIÓN POR COMPRA DE EQUIPO DE SONIDO',
-            'RETENCIÓN POR SERVICIOS DE EVENTOS',
-            'RETENCIÓN POR MANTENIMIENTO DE EDIFICIOS',
-            'RETENCIÓN POR SERVICIOS DE ARCHIVO',
-            'RETENCIÓN POR COMPRA DE BOTIQUINES',
-            'RETENCIÓN POR SERVICIOS DE FOTOCOPIADO',
-            'RETENCIÓN POR COMPRA DE EXTINTORES',
-            'RETENCIÓN POR SERVICIOS DE CUSTODIA',
-            'RETENCIÓN POR COMPRA DE AIRE ACONDICIONADO',
-            'RETENCIÓN POR SERVICIOS DE IMPRESIÓN',
-            'RETENCIÓN POR COMPRA DE GENERADORES',
-            'RETENCIÓN POR SERVICIOS DE ECOGRAFÍA',
-            'RETENCIÓN POR COMPRA DE BOMBAS',
-            'RETENCIÓN POR SERVICIOS DE SOLDADURA',
-            'RETENCIÓN POR COMPRA DE CABLES',
-            'RETENCIÓN POR SERVICIOS DE PODA',
-            'RETENCIÓN POR COMPRA DE LUBRICANTES',
-            'RETENCIÓN POR SERVICIOS DE DRENAJE',
-            'RETENCIÓN POR COMPRA DE FILTROS',
         ];
+        $retentionTypes = ['S', 'G'];
+        $statuses = ['0', '1'];
 
-        for ($i = 0; $i < 50; $i++) {
-            $supplier = $suppliers->random();
-            $date = Carbon::now()->subDays(rand(1, 365));
-            $type = $retentionTypes[array_rand($retentionTypes)];
-            $amount = rand(1000, 50000);
+        foreach ($months as $month) {
+            $start = $month->copy()->startOfMonth();
+            $end = $month->copy()->endOfMonth();
 
-            DB::transaction(function () use ($descriptions, $i, $supplier, $date, $type, $amount, $userId, $taxes, $statuses) {
-                $retention = Retention::create([
-                    'description' => $descriptions[$i],
-                    'summary' => $descriptions[$i],
-                    'amount' => $amount,
-                    'code' => (int) (($i + 16).now()->format('dHis')),
-                    'status' => $statuses[array_rand($statuses)],
-                    'type' => $type,
-                    'date' => $date,
-                    'supplier_id' => $supplier->id,
-                    'user_id' => $userId,
-                ]);
+            for ($i = 0; $i < 15; $i++) {
+                $supplier = $suppliers->random();
+                $date = $start->copy()->addDays(rand(0, $end->day - 1));
+                $type = $retentionTypes[array_rand($retentionTypes)];
+                $amount = rand(1000, 50000);
 
-                $numDiscounts = rand(1, 3);
-                for ($d = 0; $d < $numDiscounts; $d++) {
-                    $taxe = $taxes->random();
-                    $discountAmount = round($amount * $taxe->applied_discount / 100 / $numDiscounts, 2);
-                    $discountAmount = min($discountAmount, 9999.99);
-                    Discount::create([
-                        'amount' => $discountAmount,
-                        'taxe_id' => $taxe->id,
-                        'retention_id' => $retention->id,
+                DB::transaction(function () use ($retentionDescriptions, $i, $supplier, $date, $type, $amount, $userId, $taxes, $statuses) {
+                    $maxCode = Retention::whereYear('date', $date->year)
+                        ->whereMonth('date', $date->month)
+                        ->max('code') ?? 0;
+
+                    $retention = Retention::create([
+                        'description' => $retentionDescriptions[$i % 15],
+                        'summary' => $retentionDescriptions[$i % 15],
+                        'amount' => $amount,
+                        'code' => $maxCode + 1,
+                        'status' => $statuses[array_rand($statuses)],
+                        'type' => $type,
+                        'date' => $date,
+                        'supplier_id' => $supplier->id,
+                        'user_id' => $userId,
                     ]);
-                }
-            });
+
+                    $filteredTaxes = $taxes->filter(fn ($t) => $t->type === $type || $t->type === 'A');
+                    foreach ($filteredTaxes as $taxe) {
+                        $total = round($amount / (1 - ($filteredTaxes->sum('applied_discount') / 100)), 2);
+                        Discount::create([
+                            'amount' => round($total * $taxe->applied_discount / 100, 2),
+                            'taxe_id' => $taxe->id,
+                            'retention_id' => $retention->id,
+                        ]);
+                    }
+                });
+            }
         }
 
-        // ─── 30 Cash (Box) Movements ───
+        // ─── Cash (Box) Movements (15 per month) ───
         $cashDescriptions = [
             'PAGO DE HONORARIOS PROFESIONALES',
             'COMPRA DE ARTÍCULOS DE FERRETERÍA',
@@ -131,45 +112,33 @@ class MoreDataSeeder extends Seeder
             'COBRO POR VENTA DE CHATARRA',
             'PAGO DE SERVICIOS MÉDICOS',
             'COMPRA DE ARTÍCULOS DE COCINA',
-            'PAGO DE GASTOS NOTARIALES',
-            'COBRO POR SERVICIOS DE ESTACIONAMIENTO',
-            'PAGO DE VIÁTICOS',
-            'COMPRA DE BOTIQUÍN DE PRIMEROS AUXILIOS',
-            'PAGO DE GASTOS JUDICIALES',
-            'COBRO POR VENTA DE MATERIAL RECICLABLE',
-            'PAGO DE SUSCRIPCIONES',
-            'COMPRA DE CORTINAS Y PERSIANAS',
-            'PAGO DE GASTOS DE REPARACIÓN',
-            'COBRO POR ALQUILER DE SALAS',
-            'PAGO DE CUOTAS DE AFILIACIÓN',
-            'COMPRA DE EQUIPO DE PROTECCIÓN',
-            'PAGO DE GASTOS DE ENVÍO',
-            'COBRO POR SERVICIOS DE CATERING',
-            'PAGO DE LICENCIAS DE SOFTWARE',
         ];
 
-        $allPeople = Person::all();
+        foreach ($months as $month) {
+            $start = $month->copy()->startOfMonth();
+            $end = $month->copy()->endOfMonth();
 
-        for ($i = 0; $i < 30; $i++) {
-            $date = Carbon::now()->subDays(rand(1, 180));
-            $type = rand(0, 3) > 0 ? 'D' : 'C';
-            $amount = $type === 'D' ? rand(1000, 30000) : rand(500, 15000);
+            for ($i = 0; $i < 15; $i++) {
+                $date = $start->copy()->addDays(rand(0, $end->day - 1));
+                $type = rand(0, 3) > 0 ? 'D' : 'C';
+                $amount = $type === 'D' ? rand(1000, 30000) : rand(500, 15000);
 
-            DB::transaction(function () use ($date, $type, $amount, $cashDescriptions, $i, $userId, $allPeople) {
-                $movement = Movement::create([
-                    'date' => $date,
-                    'description' => $cashDescriptions[$i],
-                    'type' => $type,
-                    'amount' => $amount,
-                    'person_id' => rand(0, 4) > 0 ? $allPeople->random()->id : null,
-                    'user_id' => $userId,
-                ]);
+                DB::transaction(function () use ($date, $type, $amount, $cashDescriptions, $i, $userId, $allPeople) {
+                    $movement = Movement::create([
+                        'date' => $date,
+                        'description' => $cashDescriptions[$i],
+                        'type' => $type,
+                        'amount' => $amount,
+                        'person_id' => rand(0, 4) > 0 ? $allPeople->random()->id : null,
+                        'user_id' => $userId,
+                    ]);
 
-                Box::create(['movement_id' => $movement->id]);
-            });
+                    Box::create(['movement_id' => $movement->id]);
+                });
+            }
         }
 
-        // ─── 30 Bank (Transaction) Movements ───
+        // ─── Bank (Transaction) Movements (15 per month) ───
         $bankDescriptions = [
             'TRANSFERENCIA POR SERVICIOS DE INGENIERÍA',
             'PAGO DE DIVIDENDOS A ACCIONISTAS',
@@ -186,49 +155,39 @@ class MoreDataSeeder extends Seeder
             'COBRO DE INDEMNIZACIONES',
             'PAGO DE COMPROMISOS SINDICALES',
             'TRANSFERENCIA POR SERVICIOS TÉCNICOS',
-            'PAGO DE GASTOS OPERATIVOS',
-            'COBRO POR ARRIENDO DE MAQUINARIA',
-            'PAGO DE SERVICIOS PORTUARIOS',
-            'DEPÓSITO DE GARANTÍA',
-            'PAGO DE CUENTAS POR COBRAR',
-            'TRANSFERENCIA POR COMPRA DE INVENTARIO',
-            'PAGO DE SERVICIOS AEROPORTUARIOS',
-            'COBRO DE FIANZAS',
-            'PAGO DE GASTOS DE IMPORTACIÓN',
-            'TRANSFERENCIA POR SERVICIOS LOGÍSTICOS',
-            'PAGO DE DERECHOS DE SUPERFICIE',
-            'COBRO DE SUBSIDIOS',
-            'PAGO DE COMISIONES BANCARIAS',
-            'DEPÓSITO DE FONDOS RESERVADOS',
-            'PAGO DE CONCESIONES MINERAS',
         ];
 
         $paymentTypes = ['CH', 'T'];
 
-        for ($i = 0; $i < 30; $i++) {
-            $account = $accounts->random();
-            $date = Carbon::now()->subDays(rand(1, 180));
-            $type = rand(0, 3) > 0 ? 'D' : 'C';
-            $amount = $type === 'D' ? rand(5000, 100000) : rand(2000, 50000);
-            $paymentType = $paymentTypes[array_rand($paymentTypes)];
+        foreach ($months as $month) {
+            $start = $month->copy()->startOfMonth();
+            $end = $month->copy()->endOfMonth();
 
-            DB::transaction(function () use ($account, $date, $type, $amount, $paymentType, $bankDescriptions, $i, $userId, $allPeople) {
-                $movement = Movement::create([
-                    'date' => $date,
-                    'description' => $bankDescriptions[$i],
-                    'type' => $type,
-                    'amount' => $amount,
-                    'person_id' => rand(0, 4) > 0 ? $allPeople->random()->id : null,
-                    'user_id' => $userId,
-                ]);
+            for ($i = 0; $i < 15; $i++) {
+                $account = $accounts->random();
+                $date = $start->copy()->addDays(rand(0, $end->day - 1));
+                $type = rand(0, 3) > 0 ? 'D' : 'C';
+                $amount = $type === 'D' ? rand(5000, 100000) : rand(2000, 50000);
+                $paymentType = $paymentTypes[array_rand($paymentTypes)];
 
-                Transaction::create([
-                    'payment_type' => $paymentType,
-                    'account_id' => $account->id,
-                    'movement_id' => $movement->id,
-                    'number_check' => $paymentType === 'CH' ? 'CH-'.rand(1000, 9999) : 'TRF-'.rand(10000, 99999),
-                ]);
-            });
+                DB::transaction(function () use ($account, $date, $type, $amount, $paymentType, $bankDescriptions, $i, $userId, $allPeople) {
+                    $movement = Movement::create([
+                        'date' => $date,
+                        'description' => $bankDescriptions[$i],
+                        'type' => $type,
+                        'amount' => $amount,
+                        'person_id' => rand(0, 4) > 0 ? $allPeople->random()->id : null,
+                        'user_id' => $userId,
+                    ]);
+
+                    Transaction::create([
+                        'payment_type' => $paymentType,
+                        'account_id' => $account->id,
+                        'movement_id' => $movement->id,
+                        'number_check' => $paymentType === 'CH' ? 'CH-'.rand(1000, 9999) : 'TRF-'.rand(10000, 99999),
+                    ]);
+                });
+            }
         }
     }
 }

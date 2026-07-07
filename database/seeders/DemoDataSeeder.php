@@ -95,39 +95,47 @@ class DemoDataSeeder extends Seeder
             'RETENCIÓN POR SERVICIOS DE CAPACITACIÓN',
         ];
 
-        for ($i = 0; $i < 15; $i++) {
-            $supplier = $suppliers->random();
-            $date = Carbon::now()->subDays(rand(1, 365));
-            $type = $retentionTypes[array_rand($retentionTypes)];
-            $amount = rand(1000, 50000);
+        $now = Carbon::now();
+        $months = collect([$now->copy()->subMonths(2), $now->copy()->subMonth(), $now]);
 
-            DB::transaction(function () use ($descriptions, $i, $supplier, $date, $type, $amount, $userId, $taxes, $statuses) {
-                $retention = Retention::create([
-                    'description' => $descriptions[$i],
-                    'summary' => $descriptions[$i],
-                    'amount' => $amount,
-                    'code' => (int) ($i + 1 .now()->format('dHis')),
-                    'status' => $statuses[array_rand($statuses)],
-                    'type' => $type,
-                    'date' => $date,
-                    'supplier_id' => $supplier->id,
-                    'user_id' => $userId,
-                ]);
+        foreach ($months as $month) {
+            $start = $month->copy()->startOfMonth();
+            $end = $month->copy()->endOfMonth();
 
-                // Create 1-3 discounts per retention
-                $numDiscounts = rand(1, 3);
-                for ($d = 0; $d < $numDiscounts; $d++) {
-                    $taxe = $taxes->random();
-                    $discountAmount = round($amount * $taxe->applied_discount / 100 / $numDiscounts, 2);
-                    $discountAmount = min($discountAmount, 9999.99);
-                    Discount::create([
-                        'amount' => $discountAmount,
-                        'taxe_id' => $taxe->id,
-                        'retention_id' => $retention->id,
+            for ($i = 0; $i < 5; $i++) {
+                $supplier = $suppliers->random();
+                $date = $start->copy()->addDays(rand(0, $end->day - 1));
+                $type = $retentionTypes[array_rand($retentionTypes)];
+                $amount = rand(1000, 50000);
+
+                DB::transaction(function () use ($descriptions, $i, $supplier, $date, $type, $amount, $userId, $taxes, $statuses) {
+                    $maxCode = Retention::whereYear('date', $date->year)
+                        ->whereMonth('date', $date->month)
+                        ->max('code') ?? 0;
+
+                    $retention = Retention::create([
+                        'description' => $descriptions[$i],
+                        'summary' => $descriptions[$i],
+                        'amount' => $amount,
+                        'code' => $maxCode + 1,
+                        'status' => $statuses[array_rand($statuses)],
+                        'type' => $type,
+                        'date' => $date,
+                        'supplier_id' => $supplier->id,
+                        'user_id' => $userId,
                     ]);
-                }
 
-            });
+                    $filteredTaxes = $taxes->filter(fn ($t) => $t->type === $type || $t->type === 'A');
+                    foreach ($filteredTaxes as $taxe) {
+                        $total = round($amount / (1 - ($filteredTaxes->sum('applied_discount') / 100)), 2);
+                        Discount::create([
+                            'amount' => round($total * $taxe->applied_discount / 100, 2),
+                            'taxe_id' => $taxe->id,
+                            'retention_id' => $retention->id,
+                        ]);
+                    }
+                });
+            }
         }
 
         // ─── Cash (Box) Movements ───

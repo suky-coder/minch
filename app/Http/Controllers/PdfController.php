@@ -152,11 +152,16 @@ class PdfController extends Controller
         Carbon::setLocale('es');
         $periodLabel = ucfirst($start->translatedFormat('F \d\e Y'));
 
-        $accountBox = Movement::whereHas('box')
+        $accountBox = Movement::where(function ($q) {
+            $q->whereHas('box')->orWhere(function ($q) {
+                $q->where('type', 'B')->whereDoesntHave('transaction');
+            });
+        })
             ->whereBetween('date', [$start, $end])
             ->orderBy('date')
+            ->orderBy('id')
             ->select('*')
-            ->selectRaw('SUM(CASE WHEN type IN ("D", "B") THEN amount ELSE -amount END) OVER (ORDER BY date) as balance')
+            ->selectRaw('SUM(CASE WHEN type IN ("D", "B") THEN amount ELSE -amount END) OVER (ORDER BY date, id) as balance')
             ->get();
         $html = view(
             'PDF.account-box',

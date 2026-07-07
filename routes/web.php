@@ -140,6 +140,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('transaction/pdf/form/{start}/{end}/{id}', [PdfController::class, 'transactionAccount'])->name('transaction.account.pdf');
         Route::get('transaction/pdf/{id}', [PdfController::class, 'receiptTransaction'])->name('receipt.transaction.pdf');
     });
+
+    Route::middleware('permission:Excel libro de bancos')->group(function () {
+        Route::get('transaction/excel/form/{start}/{end}/{id}', [ExcelController::class, 'transactionAccount'])->name('transaction.account.excel');
+    });
 });
 
 require __DIR__.'/settings.php';
