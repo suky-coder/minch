@@ -23,6 +23,9 @@ class AppServiceProvider extends ServiceProvider
 
         $this->configureTallStackUi();
         $this->configureDefaults();
+        if ($this->app->environment('production')) {
+        \Illuminate\Support\Facades\URL::forceScheme('https');
+    }
         require_once app_path('Helpers/NumberHelper.php');
     }
 
