@@ -165,7 +165,7 @@ class AccountStatementView extends Component
         return [
             'amount' => 'required|numeric|min:0.01',
             'type' => 'required|in:D,C',
-            'date' => 'required|date',
+            'date' => 'required|date|before_or_equal:today',
             'description' => 'required|string|max:255',
             'doc' => 'nullable|string|max:20',
             'vol' => 'nullable|string|max:20',

@@ -36,7 +36,7 @@
                     <x-select.styled label="Tipo" :options="[['label' => 'Ingreso', 'value' => 'D'], ['label' => 'Egreso', 'value' => 'C']]" wire:model="type" />
                 </div>
                 <div>
-                    <x-date label="Fecha" wire:model="date" />
+                    <x-date label="Fecha" wire:model="date" name="date" />
                 </div>
             </div>
 

@@ -43,7 +43,7 @@ class RetentionComponentForm extends Component
             'ci' => ['required', 'min:4', 'max:15', Rule::unique('people', 'ci')->ignore($this->person_id)],
             'type' => ['required', 'in:S,G'],
             'amount' => ['required', 'numeric', 'gte:10.00', 'lte:999999999.99'],
-            'date' => ['required', 'date', 'date_format:Y-m-d', 'after:2023-01-01'],
+            'date' => ['required', 'date', 'date_format:Y-m-d', 'after:2023-01-01', 'before_or_equal:today'],
             'description' => ['required', 'min:10', 'max:400'],
             'summary' => ['required', 'min:10', 'max:255'],
         ];

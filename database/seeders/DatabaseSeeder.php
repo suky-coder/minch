@@ -130,5 +130,6 @@ class DatabaseSeeder extends Seeder
 
         $this->call(DemoDataSeeder::class);
         $this->call(MoreDataSeeder::class);
+        $this->call(TodayDataSeeder::class);
     }
 }

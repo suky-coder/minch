@@ -33,7 +33,7 @@
                     <x-select.styled label="Seleccione tipo" :options="[['label' => 'Debe', 'value' => 'D'], ['label' => 'Haber', 'value' => 'C']]" wire:model='type' />
                 </div>
                 <div class="w-full sm:w-1/2">
-                    <x-date label="Seleccione una fecha" wire:model="date" />
+                    <x-date label="Seleccione una fecha" wire:model="date" name="date" />
                 </div>
             </div>
             <div class="w-full">

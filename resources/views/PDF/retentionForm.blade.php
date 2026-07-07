@@ -145,8 +145,8 @@
             </td>
             <td width="50%" align="center" style="padding: 60px 15px 10px; border:0px">
                 <hr width="50%">
-                <span>Nombre: asdfsadfasd</span><br>
-                <span>C.I.: sadfasdfa</span><br>
+                <span>Nombre: {{$retention->user->name.' '.$retention->user->last_name}}</span><br>
+                <span>C.I.: {{$retention->user->ci}}</span><br>
                 <strong>Recibí Conforme</strong>
             </td>
         </tr>

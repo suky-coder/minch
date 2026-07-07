@@ -99,7 +99,7 @@ class BoxFormComponent extends Component
             'phone' => 'nullable|string|max:15',
             'amount' => 'required|numeric|min:0.01',
             'type' => 'required|in:D,C',
-            'date' => 'required|date',
+            'date' => 'required|date|before_or_equal:today',
             'description' => 'required|string|max:255',
             'number_check' => 'nullable|string|max:20',
         ]);
@@ -141,7 +141,7 @@ class BoxFormComponent extends Component
             'phone' => 'nullable|string|max:15',
             'amount' => 'required|numeric|min:0.01',
             'type' => 'required|in:D,C',
-            'date' => 'required|date',
+            'date' => 'required|date|before_or_equal:today',
             'description' => 'required|string|max:255',
             'number_check' => 'nullable|string|max:20',
         ]);

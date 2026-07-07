@@ -26,6 +26,7 @@ class UserFactory extends Factory
     {
         return [
             'name' => fake()->name(),
+            'last_name' => fake()->lastName(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
@@ -33,6 +34,10 @@ class UserFactory extends Factory
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
+            'ci' => fake()->unique()->numerify('########'),
+            'phone' => fake()->phoneNumber(),
+            'gender' => fake()->randomElement(['M', 'F']),
+            'birthdate' => fake()->date(),
         ];
     }
 
