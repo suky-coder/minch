@@ -33,7 +33,9 @@ use Illuminate\Support\Facades\Route;
 Route::view('/', 'welcome')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', Dashboard::class)->name('dashboard');
+    Route::middleware('permission:Ver dashboard')->group(function () {
+        Route::get('dashboard', Dashboard::class)->name('dashboard');
+    });
 
     Route::middleware('permission:Ver impuestos')->group(function () {
         Route::get('taxes', TaxeComponent::class)->name('taxes');

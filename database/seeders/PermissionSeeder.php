@@ -14,6 +14,7 @@ class PermissionSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
+            ['guard_name' => 'web', 'name' => 'Ver dashboard', 'description' => 'Puede ver el panel principal del sistema'],
             ['guard_name' => 'web', 'name' => 'Crear usuarios', 'description' => 'Puede crear nuevos usuarios'],
             ['guard_name' => 'web', 'name' => 'Editar usuarios', 'description' => 'Puede editar la información de los usuarios'],
             ['guard_name' => 'web', 'name' => 'Eliminar usuarios', 'description' => 'Puede eliminar registros de usuarios'],

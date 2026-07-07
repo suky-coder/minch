@@ -100,8 +100,10 @@
                         </h1>
                     </div>
                 </x-slot:brand-collapsed>
+                @can('Ver dashboard')
+                    
                 <x-side-bar.item text="Dashboard" icon="home" :route="route('dashboard')" wire:navigate />
-                <x-side-bar.separator line text="Gestión" />
+                @endcan
                 <x-side-bar.item text="Control de Usuario" icon="shield-check">
                     @can('Ver usuarios')
                     <x-side-bar.item text="Usuarios" icon="user" :route="route('users')" wire:navigate/>
