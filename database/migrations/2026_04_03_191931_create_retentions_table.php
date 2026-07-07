@@ -16,7 +16,7 @@ return new class extends Migration
             $table->text('description');
             $table->string('summary', 255);
             $table->decimal('amount', 12, 2);
-            $table->integer('code');
+            $table->unsignedBigInteger('code');
             $table->enum('status', ['0', '1']);
             $table->enum('type', ['S', 'G']);
             $table->date('date');
