@@ -7,11 +7,15 @@ use App\Livewire\AccountBoxes\BoxFormComponent;
 use App\Livewire\Accounts\AccountComponent;
 use App\Livewire\AccountStatements\AccountStatementComponent;
 use App\Livewire\AccountStatements\AccountStatementView;
+use App\Livewire\Contracts\ContractComponent;
+use App\Livewire\Contracts\ContractFormComponent;
+use App\Livewire\Contracts\ContractShowComponent;
 use App\Livewire\Cooperatives\CooperativeComponent;
 use App\Livewire\Cotizaciones\CotizacionComponent;
 use App\Livewire\Customers\CustomerComponent;
 use App\Livewire\Dashboard;
 use App\Livewire\Departaments\DepartamentComponent;
+use App\Livewire\Liquidations\LiquidationComponent;
 use App\Livewire\Liquidations\LiquidationForm;
 use App\Livewire\Permissions\PermissionComponent;
 use App\Livewire\Reports\BankBookReportsComponent;
@@ -58,6 +62,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('account.statement.pdf');
     });
 
+    Route::middleware('permission:Crear contratos|Editar contratos')->group(function () {
+        Route::get('contracts/form/{id?}', ContractFormComponent::class)->name('contracts.form');
+    });
+
+    Route::middleware('permission:Ver contratos')->group(function () {
+        Route::get('contracts', ContractComponent::class)->name('contracts');
+        Route::get('contracts/{contract}', ContractShowComponent::class)->name('contracts.show');
+        Route::get('contract/pdf/{contract}', [PdfController::class, 'contractPdf'])->name('contract.pdf');
+    });
+
     Route::middleware('permission:Ver caja chica')->group(function () {
         Route::get('accounts-boxes', AccountBoxComponent::class)->name('accounts.box');
         Route::get('account/box/pdf', [PdfController::class, 'accountBox'])->name('account.box.pdf');
@@ -101,7 +115,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::middleware('permission:Ver liquidaciones')->group(function () {
-        Route::get('liquidations/form', LiquidationForm::class)->name('liquidation.form');
+        Route::get('liquidations', LiquidationComponent::class)->name('liquidations');
+        Route::get('liquidations/form/{id?}', LiquidationForm::class)->name('liquidation.form');
+        Route::get('liquidation/pdf/{liquidation}', [PdfController::class, 'liquidationPdf'])->name('liquidation.pdf');
     });
 
     Route::middleware('permission:Ver cotizaciones')->group(function () {

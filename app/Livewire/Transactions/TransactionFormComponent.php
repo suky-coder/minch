@@ -3,6 +3,7 @@
 namespace App\Livewire\Transactions;
 
 use App\Models\Movement;
+use App\Models\Person;
 use App\Services\MovementBalanceService;
 use App\Services\PersonSupplierService;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +26,8 @@ class TransactionFormComponent extends Component
     public $number_check;
 
     public $payment_type = 'CH';
+
+    public $personType = 'supplier';
 
     public $ci;
 
@@ -61,6 +64,9 @@ class TransactionFormComponent extends Component
                     $this->ci = $movement->person->ci;
                     $this->full_name = $movement->person->full_name;
                     $this->phone = $movement->person->phone;
+
+                    $movement->person->load(['supplier', 'customer']);
+                    $this->personType = $movement->person->customer ? 'customer' : ($movement->person->supplier ? 'supplier' : $this->personType);
                 }
             }
         }
@@ -93,6 +99,11 @@ class TransactionFormComponent extends Component
         $this->ci = $payload['ci'];
         $this->full_name = $payload['full_name'];
         $this->phone = $payload['phone'];
+
+        $person = Person::with(['supplier', 'customer'])->find($payload['person_id']);
+        if ($person) {
+            $this->personType = $person->customer ? 'customer' : ($person->supplier ? 'supplier' : $this->personType);
+        }
     }
 
     public function store()
@@ -100,15 +111,14 @@ class TransactionFormComponent extends Component
         $this->validate($this->rules());
 
         DB::transaction(function () {
-            $personSupplier = app(PersonSupplierService::class);
-            $supplier = $personSupplier->resolve($this->ci, $this->full_name, $this->phone);
+            $person = $this->resolvePerson();
 
             $movement = Movement::create([
                 'date' => $this->date,
                 'description' => $this->description,
                 'type' => $this->type,
                 'amount' => $this->amount,
-                'person_id' => $supplier->person_id,
+                'person_id' => $person->id,
                 'user_id' => auth()->id(),
             ]);
 
@@ -133,15 +143,14 @@ class TransactionFormComponent extends Component
 
         DB::transaction(function () {
             $movement = Movement::with('transaction')->findOrFail($this->id);
-            $personSupplier = app(PersonSupplierService::class);
-            $supplier = $personSupplier->resolve($this->ci, $this->full_name, $this->phone);
+            $person = $this->resolvePerson();
 
             $movement->update([
                 'date' => $this->date,
                 'description' => $this->description,
                 'type' => $this->type,
                 'amount' => $this->amount,
-                'person_id' => $supplier->person_id,
+                'person_id' => $person->id,
             ]);
 
             $movement->transaction()->update([
@@ -162,6 +171,7 @@ class TransactionFormComponent extends Component
     protected function rules(): array
     {
         return [
+            'personType' => 'required|in:supplier,customer',
             'ci' => 'required|string|max:15',
             'full_name' => 'required|string|max:150',
             'phone' => 'nullable|string|max:15',
@@ -176,8 +186,39 @@ class TransactionFormComponent extends Component
 
     public function clear()
     {
-        $this->reset(['ci', 'full_name', 'phone', 'amount', 'type', 'date', 'description', 'number_check', 'id', 'person_id', 'payment_type']);
+        $this->reset(['ci', 'full_name', 'phone', 'amount', 'type', 'date', 'description', 'number_check', 'id', 'person_id', 'payment_type', 'personType']);
         $this->resetValidation();
         $this->dispatch('close-modal');
+    }
+
+    private function resolvePerson(): Person
+    {
+        if ($this->personType === 'supplier') {
+            $supplier = app(PersonSupplierService::class)->resolve(
+                $this->ci,
+                $this->full_name,
+                $this->phone
+            );
+
+            return $supplier->person;
+        }
+
+        $person = Person::firstOrCreate(
+            ['ci' => $this->ci],
+            ['full_name' => $this->full_name, 'phone' => $this->phone]
+        );
+
+        if ($person->wasRecentlyCreated === false) {
+            $person->update(array_filter([
+                'full_name' => $this->full_name,
+                'phone' => $this->phone,
+            ]));
+        }
+
+        \App\Models\Customer::firstOrCreate(
+            ['person_id' => $person->id]
+        );
+
+        return $person;
     }
 }

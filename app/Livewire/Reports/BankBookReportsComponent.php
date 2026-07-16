@@ -63,9 +63,9 @@ class BankBookReportsComponent extends Component
             ->selectRaw('SUM(CASE WHEN type IN ("D", "B") THEN amount ELSE -amount END) OVER (ORDER BY date, id) as balance')
             ->get();
 
-        return $movements->map(function ($m) {
+        return $movements->values()->map(function ($m, $index) {
             return [
-                'number' => $m->transaction?->formatted_last_number ?? '',
+                'number' => $index + 1,
                 'date' => Carbon::parse($m->date)->format('d/m/Y'),
                 'description' => $m->description,
                 'ref' => $m->transaction?->number_label ?? '',

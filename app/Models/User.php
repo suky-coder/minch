@@ -33,6 +33,7 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
     public function retentions(): HasMany
     {
         return $this->hasMany(Retention::class);

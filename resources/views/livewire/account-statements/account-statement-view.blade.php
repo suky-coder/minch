@@ -90,6 +90,7 @@
                         <th scope="col" class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-dark-300">Descripción</th>
                         <th scope="col" class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-dark-300">Dcto. Ref.</th>
                         <th scope="col" class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-dark-300">Nº Volq.</th>
+                        <th scope="col" class="px-4 py-3.5 text-center text-xs font-semibold uppercase tracking-wider text-dark-300">Contrato</th>
                         <th scope="col" class="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-emerald-400">Debe</th>
                         <th scope="col" class="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-red-400">Haber</th>
                         <th scope="col" class="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-primary-400">Saldo</th>
@@ -112,14 +113,24 @@
                             <td class="whitespace-nowrap px-4 py-3.5 text-sm text-dark-200 max-w-[200px] truncate" title="{{ $movement->description }}">{{ $movement->description }}</td>
                             <td class="whitespace-nowrap px-4 py-3.5 text-sm font-mono text-dark-300">{{ $documentRef }}</td>
                             <td class="whitespace-nowrap px-4 py-3.5 text-sm font-mono text-dark-300">{{ $movement->number_vol }}</td>
+                            <td class="whitespace-nowrap px-4 py-3.5 text-sm text-center">
+                                @if ($movement->contract)
+                                    <a href="{{ route('contracts.show', $movement->contract_id) }}"
+                                       class="text-blue-400 hover:text-blue-300 font-mono text-xs">
+                                        {{ $movement->contract->code }}
+                                    </a>
+                                @else
+                                    <span class="text-dark-500">—</span>
+                                @endif
+                            </td>
                             <td class="whitespace-nowrap px-4 py-3.5 text-sm text-right font-mono font-medium text-emerald-300">
-                                {{ in_array($movement->type, ['D', 'B']) ? number_format($movement->amount, 2, '.', ',') : '' }}
+                                {{ in_array($movement->type, ['D', 'B']) ? number_format($movement->amount, 2, ',', '.') : '' }}
                             </td>
                             <td class="whitespace-nowrap px-4 py-3.5 text-sm text-right font-mono font-medium text-red-300">
-                                {{ $movement->type === 'C' ? number_format($movement->amount, 2, '.', ',') : '' }}
+                                {{ $movement->type === 'C' ? number_format($movement->amount, 2, ',', '.') : '' }}
                             </td>
                             <td class="whitespace-nowrap px-4 py-3.5 text-sm text-right font-mono font-semibold text-primary-300">
-                                {{ number_format($movement->balance, 2, '.', ',') }}
+                                {{ number_format($movement->balance, 2, ',', '.') }}
                             </td>
                             <td class="whitespace-nowrap px-4 py-3.5 text-sm text-center text-dark-300">
                                 @if ($movement->type !== 'B' && $isManual)
@@ -145,7 +156,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="px-4 py-16">
+                            <td colspan="10" class="px-4 py-16">
                                 <div class="flex flex-col items-center justify-center gap-4 text-center">
                                     <div class="w-16 h-16 flex items-center justify-center rounded-2xl bg-dark-600/30 border border-dark-500/20">
                                         <svg class="w-8 h-8 text-dark-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">

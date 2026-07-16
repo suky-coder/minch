@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Account;
+use App\Models\Contract;
+use App\Models\Liquidation;
 use App\Models\Movement;
 use App\Models\Retention;
 use App\Services\AccountStatementService;
@@ -184,5 +186,43 @@ class PdfController extends Controller
 
         // 4. Mostrar el PDF en el navegador (stream)
         return $mpdf->Output('caja-'.$date.'.pdf', 'I');
+    }
+
+    public function contractPdf(Contract $contract)
+    {
+        $contract->load(['person', 'movements.box', 'movements.transaction']);
+
+        $html = view('PDF.contract', compact('contract'))->render();
+
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => [215.9, 279.4],
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 10,
+            'margin_bottom' => 10,
+        ]);
+        $mpdf->WriteHTML($html);
+
+        return $mpdf->Output('contrato-'.$contract->code.'.pdf', 'I');
+    }
+
+    public function liquidationPdf(Liquidation $liquidation)
+    {
+        $liquidation->load('customer');
+
+        $html = view('PDF.liquidation', ['l' => $liquidation])->render();
+
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 10,
+            'margin_bottom' => 10,
+        ]);
+        $mpdf->WriteHTML($html);
+
+        return $mpdf->Output('liquidacion-'.$liquidation->lote.'.pdf', 'I');
     }
 }

@@ -1,4 +1,152 @@
-<div>
+<div x-data="{
+    metal: '{{ $metal }}',
+    tab: 'generales',
+    tmh: {{ $tmh }},
+    h2o: {{ $h2o }},
+    merma: {{ $merma }},
+    dm: {{ $dm }},
+    base: {{ $base }},
+    basePorcentaje: {{ $basePorcentaje }},
+    maquila: {{ $maquila }},
+    Sb: {{ $Sb }},
+    Fe: {{ $Fe }},
+    SiO2: {{ $SiO2 }},
+    Sn: {{ $Sn }},
+    As: {{ $As }},
+    PAs: {{ $PAs }},
+    PAsUSD: {{ $PAsUSD }},
+    PAsp: {{ $PAsp }},
+    PFe: {{ $PFe }},
+    PFeUSD: {{ $PFeUSD }},
+    PFep: {{ $PFep }},
+    PSb: {{ $PSb }},
+    PSbUSD: {{ $PSbUSD }},
+    PSbp: {{ $PSbp }},
+    PSiO2: {{ $PSiO2 }},
+    PSiO2USD: {{ $PSiO2USD }},
+    PSiO2p: {{ $PSiO2p }},
+    PSn: {{ $PSn }},
+    PSnUSD: {{ $PSnUSD }},
+    PSnp: {{ $PSnp }},
+    AgUSD: {{ $AgUSD }},
+    agNIM: {{ $agNIM }},
+    regaliaAg: {{ $regaliaAg }},
+    factorRegalia: {{ $factorRegalia }},
+    tc: {{ $tc }},
+    flete: {{ $flete }},
+    rollback: {{ $rollback }},
+    remesaPct: {{ $remesaPct }},
+    cns: {{ $cns }},
+    comibol: {{ $comibol }},
+    fedecomin: {{ $fedecomin }},
+    fencomin: {{ $fencomin }},
+    aporteCoop: {{ $aporteCoop }},
+    NIM: {{ $NIM }},
+    zinc: {{ $zinc }},
+    Zn: {{ $Zn }},
+    regaliaZn: {{ $regaliaZn }},
+    nimPb: {{ $nimPb }},
+    plomo: {{ $plomo }},
+    Pb: {{ $Pb }},
+    regaliaPb: {{ $regaliaPb }},
+    refinacion: {{ $refinacion }},
+
+    init() {
+        window.addEventListener('aporte-coop-sync', (e) => {
+            this.aporteCoop = e.detail.value;
+        });
+    },
+    getData() {
+        return {
+            metal: this.metal, tmh: this.tmh, h2o: this.h2o, merma: this.merma, dm: this.dm,
+            base: this.base, basePorcentaje: this.basePorcentaje, maquila: this.maquila,
+            Sb: this.Sb, Fe: this.Fe, SiO2: this.SiO2, Sn: this.Sn, As: this.As,
+            PAs: this.PAs, PAsUSD: this.PAsUSD, PAsp: this.PAsp,
+            PFe: this.PFe, PFeUSD: this.PFeUSD, PFep: this.PFep,
+            PSb: this.PSb, PSbUSD: this.PSbUSD, PSbp: this.PSbp,
+            PSiO2: this.PSiO2, PSiO2USD: this.PSiO2USD, PSiO2p: this.PSiO2p,
+            PSn: this.PSn, PSnUSD: this.PSnUSD, PSnp: this.PSnp,
+            AgUSD: this.AgUSD, agNIM: this.agNIM,
+            regaliaAg: this.regaliaAg, factorRegalia: this.factorRegalia,
+            tc: this.tc, flete: this.flete, rollback: this.rollback, remesaPct: this.remesaPct,
+            cns: this.cns, comibol: this.comibol, fedecomin: this.fedecomin,
+            fencomin: this.fencomin, aporteCoop: this.aporteCoop,
+            NIM: this.NIM, zinc: this.zinc, Zn: this.Zn, regaliaZn: this.regaliaZn,
+            nimPb: this.nimPb, plomo: this.plomo, Pb: this.Pb,
+            regaliaPb: this.regaliaPb, refinacion: this.refinacion
+        };
+    },
+
+    setDefaults() {
+        if (this.metal === 'zn') {
+            this.tmh = 22.720; this.h2o = 11.45; this.dm = 6.91; this.base = 3000; this.maquila = 90;
+            this.Sb = 0.1; this.Fe = 9.5; this.SiO2 = 5; this.Sn = 0; this.As = 0.1;
+            this.PAsUSD = 3; this.PSbUSD = 3; this.PFeUSD = 3; this.PSiO2USD = 3; this.PSnUSD = 3;
+            this.AgUSD = 75; this.tc = 8.70; this.flete = 160; this.rollback = 42; this.comibol = 1;
+            this.NIM = 1.55; this.zinc = 54.06; this.Zn = 3434; this.regaliaZn = 3;
+        } else {
+            this.tmh = 35.920; this.h2o = 10.66815; this.dm = 24.21; this.base = 2000; this.maquila = 0;
+            this.Sb = 1.30; this.Fe = 6.20; this.SiO2 = 3; this.Sn = 0; this.As = 1.30;
+            this.PAsUSD = 3.5; this.PSbUSD = 3.5; this.PFeUSD = 3.5; this.PSiO2USD = 3.5; this.PSnUSD = 3.5;
+            this.AgUSD = 73.50; this.tc = 9.10; this.flete = 180; this.rollback = 38; this.comibol = 0; this.remesaPct = 0.6;
+            this.nimPb = 0.88; this.plomo = 52.88; this.Pb = 1936; this.regaliaPb = 3;
+        }
+    },
+
+    get tms() { return Number((this.tmh - (this.tmh * this.h2o / 100)).toFixed(this.metal === 'pb' ? 5 : 3)); },
+    get tmns() { const raw = -(this.tms * this.merma / 100) + this.tms; return Number(raw.toFixed(this.metal === 'pb' ? 5 : 3)); },
+    get ag() { return parseFloat(this.dm) * 100; },
+    get platacalculate() { return (parseFloat(this.dm) * 100) / 31.1035; },
+    get ley() { return this.metal === 'zn' ? parseFloat(this.zinc) : parseFloat(this.plomo); },
+    get precioMetal() { return this.metal === 'zn' ? Number(this.Zn) : Number(this.Pb); },
+    get nim() { return this.metal === 'zn' ? Number(this.NIM) : Number(this.nimPb); },
+    get deduccionMetal() { return this.metal === 'zn' ? 8 : 3; },
+    get deduccionAg() { return this.metal === 'zn' ? 3 : 1.6; },
+    get payAg() { return this.metal === 'zn' ? 0.7 : 0.95; },
+    get leyPorcentual() { return this.ley - this.deduccionMetal; },
+    get valorMetal() {
+        const base = this.leyPorcentual * this.precioMetal / 100;
+        return this.metal === 'zn' ? base : Number(base.toFixed(2)) * 0.95;
+    },
+    get plataporcentual() { return this.platacalculate - this.deduccionAg; },
+    get platavalue() { return Number(this.AgUSD) * this.payAg; },
+    get totalplata() {
+        const raw = this.plataporcentual * this.platavalue;
+        return this.metal === 'pb' ? Number(raw.toFixed(2)) : raw;
+    },
+    get baseEscala() { return this.precioMetal > Number(this.base) ? this.precioMetal - Number(this.base) : 0; },
+    get baseTotal() { return this.precioMetal > Number(this.base) ? (this.precioMetal - Number(this.base)) * Number(this.basePorcentaje) : 0; },
+    get refinacionTotal() {
+        const raw = this.platacalculate * Number(this.refinacion);
+        return this.metal === 'pb' ? Number(raw.toFixed(2)) : raw;
+    },
+    get AsTotal() { return Number(this.As) > Number(this.PAs) ? (Number(this.As) - Number(this.PAs)) * (Number(this.PAsUSD) / Math.max(Number(this.PAsp), 0.001)) : 0; },
+    get SbTotal() { return Number(this.Sb) > Number(this.PSb) ? (Number(this.Sb) - Number(this.PSb)) * (Number(this.PSbUSD) / Math.max(Number(this.PSbp), 0.001)) : 0; },
+    get FeTotal() { return Number(this.Fe) > Number(this.PFe) ? (Number(this.Fe) - Number(this.PFe)) * (Number(this.PFeUSD) / Math.max(Number(this.PFep), 0.001)) : 0; },
+    get SiO2Total() { return Number(this.SiO2) > Number(this.PSiO2) ? (Number(this.SiO2) - Number(this.PSiO2)) * (Number(this.PSiO2USD) / Math.max(Number(this.PSiO2p), 0.001)) : 0; },
+    get SnTotal() { return Number(this.Sn) > Number(this.PSn) ? (Number(this.Sn) - Number(this.PSn)) * (Number(this.PSnUSD) / Math.max(Number(this.PSnp), 0.001)) : 0; },
+    get totalCT() { const b = this.baseTotal + this.AsTotal + this.SbTotal + this.FeTotal + this.SiO2Total + this.SnTotal; return parseFloat(this.maquila) + b + (this.metal === 'pb' ? this.refinacionTotal : 0); },
+    get valorNeto() { return Number((this.valorMetal + this.totalplata - this.totalCT).toFixed(2)); },
+    get totalNetoUSD() { const raw = this.valorMetal + this.totalplata - this.totalCT; return raw * Number(this.tmns); },
+    get gastosOp() { return ((this.tmns*1000*this.ley/100*2.2046223*this.nim*5/100)+(Number(this.dm)*this.tmns/10*32.15073*Number(this.agNIM)*6/100))-((this.tmns*1000*this.ley/100*2.2046223*this.nim*3/100)+(Number(this.dm)*this.tmns/10*32.15073*Number(this.agNIM)*3.6/100)); },
+    get totalFlete() { return Number(this.flete) * Number(this.tmh); },
+    get totalRollback() { return Number(this.rollback) * Number(this.tmh); },
+    get totalRemesa() { return (this.totalNetoUSD * Number(this.remesaPct) / 100) + (this.metal === 'pb' ? 305 : 385); },
+    get totalGastos() { return this.totalFlete + this.totalRollback + this.gastosOp + this.totalRemesa; },
+    get totalUSDperTMNS() { return this.tmns ? (this.totalNetoUSD - this.totalGastos) / this.tmns : 0; },
+    get totalUSD() { return this.totalNetoUSD - this.totalGastos; },
+    get totalBs() { return this.totalUSD * Number(this.tc); },
+    get regaliaMetalBs() { const r = this.metal === 'zn' ? Number(this.regaliaZn) : Number(this.regaliaPb); return (this.tmns*1000*this.ley/100*2.2046223*this.nim*r/100)*Number(this.factorRegalia); },
+    get regaliaAgBs() { return (Number(this.dm)*this.tmns/10*32.15073*Number(this.agNIM)*Number(this.regaliaAg)/100)*Number(this.factorRegalia); },
+    get totalRM() { return this.regaliaMetalBs + this.regaliaAgBs; },
+    get cnsBs() { return this.totalBs * Number(this.cns) / 100; },
+    get comibolBs() { return this.totalBs * Number(this.comibol) / 100; },
+    get fedecominBs() { return this.totalBs * Number(this.fedecomin) / 100; },
+    get fencominBs() { return this.totalBs * Number(this.fencomin) / 100; },
+    get aporteCoopBs() { return this.totalBs * Number(this.aporteCoop) / 100; },
+    get totalAportes() { return this.cnsBs + this.comibolBs + this.fedecominBs + this.fencominBs + this.aporteCoopBs; },
+    get costoFinal() { return this.totalBs - this.totalRM - this.totalAportes; }
+}">
     <x-card>
         <x-slot:header>
             <span class="font-semibold text-base">{{ $this->id ? 'Actualizar' : 'Agregar' }}
@@ -7,301 +155,10 @@
             </span>
         </x-slot:header>
         <div class="row ">
-            <form id="user-create" wire:submit="save" class="space-y-2">
+            <form id="user-create" class="space-y-2">
                 <div class="space-y-1">
 
-                    <div x-data="{
-                        // Metal selector
-                        metal: @entangle('metal'),
-                        tab: 'generales',
-                        // Shared defaults
-                        tmh: 22.720,
-                        h2o: 11.45,
-                        merma: 1,
-                        dm: 6.91,
-                        base: 3000,
-                        basePorcentaje: 0.15,
-                        baseEscalacion: 0,
-                        maquila: 90,
-                        Ag: 0,
-                        Sb:0.1,
-                        Fe:9.5,
-                        SiO2:5,
-                        Sn:0,
-                        As:0.1,
-                        PAs:0.5,
-                        PAsUSD:3,
-                        PAsp:0.1,
-                        PFe:8,
-                        PFeUSD:3,
-                        PFep:1,
-                        PSb:0.5,
-                        PSbUSD:3,
-                        PSbp:0.1,
-                        PSiO2:3,
-                        PSiO2USD:3,
-                        PSiO2p:1,
-                        PSn:0.5,
-                        PSnUSD:3,
-                        PSnp:0.1,
-                        AgUSD: 75,
-                        agNIM:76.38,
-                        regaliaAg:3.6,
-                        factorRegalia:6.96,
-                        tc:8.70,
-                        flete:160,
-                        rollback:42,
-                        remesaPct:0.8,
-                        cns:1.8,
-                        comibol:1,
-                        fedecomin:1,
-                        fencomin:0.4,
-                        aporteCoop:0,
-                        // Zn-specific
-                        NIM: 1.55,
-                        zinc: 54.06,
-                        Zn: 3434,
-                        regaliaZn:3,
-                        // Pb-specific
-                        nimPb: 0.88,
-                        plomo: 52.88,
-                        Pb: 1936,
-                        regaliaPb:3,
-                        refinacion: 0.05,
-                        payabilidadPb: 0.95,
-                        payabilidadAg: 0.95,
-                        init() {
-                            this.setDefaults();
-                        },
-                        setDefaults() {
-                            if (this.metal === 'zn') {
-                                this.tmh = 22.720;
-                                this.h2o = 11.45;
-                                this.dm = 6.91;
-                                this.base = 3000;
-                                this.maquila = 90;
-                                this.Sb = 0.1;
-                                this.Fe = 9.5;
-                                this.SiO2 = 5;
-                                this.Sn = 0;
-                                this.As = 0.1;
-                                this.PAsUSD = 3;
-                                this.PSbUSD = 3;
-                                this.PFeUSD = 3;
-                                this.PSiO2USD = 3;
-                                this.PSnUSD = 3;
-                                this.AgUSD = 75;
-                                this.tc = 8.70;
-                                this.flete = 160;
-                                this.rollback = 42;
-                                this.comibol = 1;
-                                this.NIM = 1.55;
-                                this.zinc = 54.06;
-                                this.Zn = 3434;
-                                this.regaliaZn = 3;
-                            } else {
-                                this.tmh = 35.920;
-                                this.h2o = 10.67;
-                                this.dm = 24.21;
-                                this.base = 2000;
-                                this.maquila = 0;
-                                this.Sb = 1.30;
-                                this.Fe = 6.20;
-                                this.SiO2 = 3;
-                                this.Sn = 0;
-                                this.As = 1.30;
-                                this.PAsUSD = 3.5;
-                                this.PSbUSD = 3.5;
-                                this.PFeUSD = 3.5;
-                                this.PSiO2USD = 3.5;
-                                this.PSnUSD = 3.5;
-                                this.AgUSD = 73.50;
-                                this.tc = 9.10;
-                                this.flete = 180;
-                                this.rollback = 38;
-                                this.comibol = 0;
-                                this.nimPb = 0.88;
-                                this.plomo = 52.88;
-                                this.Pb = 1936;
-                                this.regaliaPb = 3;
-                            }
-                        },
-                        get tms() {
-                            return Number((this.tmh - (this.tmh * this.h2o / 100)).toFixed(3));
-                        },
-                        get tmns() {
-                            return Number((-(this.tms * this.merma / 100) + this.tms).toFixed(3));
-                        },
-                        get ag() {
-                            return parseFloat(this.dm) * 100;
-                        },
-                        get platacalculate() {
-                            return (parseFloat(this.dm) * 100) / 31.1035;
-                        },
-                        get ley() {
-                            return this.metal === 'zn' ? parseFloat(this.zinc) : parseFloat(this.plomo);
-                        },
-                        get precioMetal() {
-                            return this.metal === 'zn' ? Number(this.Zn) : Number(this.Pb);
-                        },
-                        get nim() {
-                            return this.metal === 'zn' ? Number(this.NIM) : Number(this.nimPb);
-                        },
-                        get deduccionMetal() {
-                            return this.metal === 'zn' ? 8 : 3;
-                        },
-                        get deduccionAg() {
-                            return this.metal === 'zn' ? 3 : 1.6;
-                        },
-                        get payAg() {
-                            return this.metal === 'zn' ? 0.7 : Number(this.payabilidadAg);
-                        },
-                        get leyPorcentual() {
-                            return this.ley - this.deduccionMetal;
-                        },
-                        get valorMetal() {
-                            if (this.metal === 'zn') {
-                                return this.leyPorcentual * this.precioMetal / 100;
-                            } else {
-                                return this.leyPorcentual * this.precioMetal * Number(this.payabilidadPb) / 100;
-                            }
-                        },
-                        get plataporcentual() {
-                            return this.platacalculate - this.deduccionAg;
-                        },
-                        get platavalue() {
-                            return Number(this.AgUSD) * this.payAg;
-                        },
-                        get totalplata() {
-                            return this.plataporcentual * this.platavalue;
-                        },
-                        get baseEscala() {
-                            if (this.precioMetal > Number(this.base)) {
-                                return this.precioMetal - Number(this.base);
-                            } else {
-                                return 0;
-                            }
-                        },
-                        get baseTotal() {
-                            if (this.precioMetal > Number(this.base)) {
-                                return (this.precioMetal - Number(this.base)) * Number(this.basePorcentaje);
-                            } else {
-                                return 0 * Number(this.basePorcentaje);
-                            }
-                        },
-                        get refinacionTotal() {
-                            return this.platacalculate * Number(this.refinacion);
-                        },
-                        get AsTotal(){
-                            if(Number(this.As) > Number(this.PAs)){
-                                return (Number(this.As)-Number(this.PAs))*(Number(this.PAsUSD)/Number(this.PAsp));
-                            }
-                            else{
-                                return 0;
-                            }
-                        },
-                        get SbTotal(){
-                            if(Number(this.Sb) > Number(this.PSb)){
-                                return (Number(this.Sb)-Number(this.PSb))*(Number(this.PSbUSD)/Number(this.PSbp));
-                            }
-                            else{
-                                return 0;
-                            }
-                        },
-                        get FeTotal(){
-                            if(Number(this.Fe) > Number(this.PFe)){
-                                return (Number(this.Fe)-Number(this.PFe))*(Number(this.PFeUSD)/Number(this.PFep));
-                            }
-                            else{
-                                return 0;
-                            }
-                        },
-                        get SiO2Total(){
-                            if(Number(this.SiO2) > Number(this.PSiO2)){
-                                return (Number(this.SiO2)-Number(this.PSiO2))*(Number(this.PSiO2USD)/Number(this.PSiO2p));
-                            }
-                            else{
-                                return 0;
-                            }
-                        },
-                        get SnTotal(){
-                            if(Number(this.Sn) > Number(this.PSn)){
-                                return (Number(this.Sn)-Number(this.PSn))*(Number(this.PSnUSD)/Number(this.PSnp));
-                            }
-                            else{
-                                return 0;
-                            }
-                        },
-                        get totalCT() {
-                            const base = this.baseTotal + this.AsTotal + this.SbTotal + this.FeTotal + this.SiO2Total + this.SnTotal;
-                            if (this.metal === 'zn') {
-                                return parseFloat(this.maquila) + base;
-                            } else {
-                                return parseFloat(this.maquila) + this.refinacionTotal + base;
-                            }
-                        },
-                        get valorNeto() {
-                            return Number((this.valorMetal + this.totalplata - this.totalCT).toFixed(2));
-                        },
-                        get totalNetoUSD() {
-                            return Number(this.valorNeto) * Number(this.tmns);
-                        },
-                        get gastosOp(){
-                            return ((this.tmns*1000*this.ley/100*2.2046223*this.nim*5/100) + (Number(this.dm)*this.tmns/10*32.15073*Number(this.agNIM)*6/100)) -  ((this.tmns*1000*this.ley/100*2.2046223*this.nim*3/100) + (Number(this.dm)*this.tmns/10*32.15073*Number(this.agNIM)*3.6/100));
-                        },
-                        get totalFlete() {
-                            return Number(this.flete) * Number(this.tmh);
-                        },
-                        get totalRollback() {
-                            return Number(this.rollback) * Number(this.tmh);
-                        },
-                        get totalRemesa() {
-                            return (this.totalNetoUSD * Number(this.remesaPct)/100) + 385;
-                        },
-                        get totalGastos() {
-                            return this.totalFlete + this.totalRollback + this.gastosOp + this.totalRemesa;
-                        },
-                        get totalUSDperTMNS() {
-                            return this.tmns ? (this.totalNetoUSD - this.totalGastos) / this.tmns : 0;
-                        },
-                        get totalUSD() {
-                            return this.totalNetoUSD - this.totalGastos;
-                        },
-                        get totalBs() {
-                            return this.totalUSD * Number(this.tc);
-                        },
-                        get regaliaMetalBs() {
-                            const r = this.metal === 'zn' ? Number(this.regaliaZn) : Number(this.regaliaPb);
-                            return (this.tmns*1000*this.ley/100*2.2046223*this.nim*r/100)*Number(this.factorRegalia);
-                        },
-                        get regaliaAgBs() {
-                            return (Number(this.dm)*this.tmns/10*32.15073*Number(this.agNIM)*Number(this.regaliaAg)/100)*Number(this.factorRegalia)
-                        },
-                        get totalRM() {
-                            return this.regaliaMetalBs + this.regaliaAgBs;
-                        },
-                        get cnsBs() {
-                            return this.totalBs * Number(this.cns) / 100;
-                        },
-                        get comibolBs() {
-                            return this.totalBs * Number(this.comibol) / 100;
-                        },
-                        get fedecominBs() {
-                            return this.totalBs * Number(this.fedecomin) / 100;
-                        },
-                        get fencominBs() {
-                            return this.totalBs * Number(this.fencomin) / 100;
-                        },
-                        get aporteCoopBs() {
-                            return this.totalBs * Number(this.aporteCoop) / 100;
-                        },
-                        get totalAportes() {
-                            return this.cnsBs + this.comibolBs + this.fedecominBs + this.fencominBs + this.aporteCoopBs;
-                        },
-                        get costoFinal() {
-                            return this.totalBs - this.totalRM - this.totalAportes;
-                        }
-                    }">
+                    <div>
 
                         {{-- Metal Selector --}}
                         <div class="flex items-center gap-3 mb-4 p-3 bg-gray-50 dark:bg-dark-700 rounded-lg">
@@ -317,29 +174,19 @@
                         <div class="flex flex-wrap gap-2 mb-6 border-b border-gray-200 dark:border-dark-600 pb-3">
                             <button @click="tab = 'generales'" type="button"
                                 :class="tab === 'generales' ? 'bg-primary-500 text-white shadow-sm' : 'bg-gray-100 dark:bg-dark-600 text-gray-700 dark:text-dark-200 hover:bg-gray-200 dark:hover:bg-dark-500'"
-                                class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200">
-                                Datos Generales
-                            </button>
+                                class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200">Datos Generales</button>
                             <button @click="tab = 'pesos'" type="button"
                                 :class="tab === 'pesos' ? 'bg-primary-500 text-white shadow-sm' : 'bg-gray-100 dark:bg-dark-600 text-gray-700 dark:text-dark-200 hover:bg-gray-200 dark:hover:bg-dark-500'"
-                                class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200">
-                                Pesos y Leyes
-                            </button>
+                                class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200">Pesos y Leyes</button>
                             <button @click="tab = 'deducciones'" type="button"
                                 :class="tab === 'deducciones' ? 'bg-primary-500 text-white shadow-sm' : 'bg-gray-100 dark:bg-dark-600 text-gray-700 dark:text-dark-200 hover:bg-gray-200 dark:hover:bg-dark-500'"
-                                class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200">
-                                Deducciones
-                            </button>
+                                class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200">Deducciones</button>
                             <button @click="tab = 'gastos'" type="button"
                                 :class="tab === 'gastos' ? 'bg-primary-500 text-white shadow-sm' : 'bg-gray-100 dark:bg-dark-600 text-gray-700 dark:text-dark-200 hover:bg-gray-200 dark:hover:bg-dark-500'"
-                                class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200">
-                                Gastos y Totales
-                            </button>
+                                class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200">Gastos y Totales</button>
                             <button @click="tab = 'regalias'" type="button"
                                 :class="tab === 'regalias' ? 'bg-primary-500 text-white shadow-sm' : 'bg-gray-100 dark:bg-dark-600 text-gray-700 dark:text-dark-200 hover:bg-gray-200 dark:hover:bg-dark-500'"
-                                class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200">
-                                Regalías y Aportes
-                            </button>
+                                class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200">Regalías y Aportes</button>
                         </div>
 
                         {{-- Tab 1: Datos Generales --}}
@@ -362,7 +209,7 @@
                             </div>
                             <div class="flex flex-col sm:flex-row gap-4">
                                 <div class="w-full sm:w-1/2">
-                                    <x-input label="COOP. MINERA:" type="text" wire:model="name" />
+                                    <x-input label="COOP. MINERA:" type="text" wire:model="cooperative_name" />
                                 </div>
                                 <div class="w-full sm:w-1/2">
                                     <x-input label="NIM:" type="text" wire:model="nim" />
@@ -394,42 +241,31 @@
                             </div>
 
                             <div class="border-t border-gray-200 dark:border-dark-600 my-4 pt-4">
-                                <div class="flex flex-col sm:flex-row gap-4 mb-2">
-                                    <div class="w-full sm:w-1/2">
-                                        <h1 class="text-sm font-semibold text-gray-600 dark:text-dark-300">Cotización Quincenal</h1>
-                                    </div>
-                                    <div class="w-full sm:w-1/2">
-                                        <h1 class="text-sm font-semibold text-gray-600 dark:text-dark-300">Cotizaciones</h1>
-                                    </div>
-                                </div>
+                                <h1 class="text-sm font-semibold text-gray-600 dark:text-dark-300 mb-3">Cotizaciones</h1>
                                 <div class="flex flex-col sm:flex-row gap-4">
                                     <div class="w-full sm:w-1/2">
-                                        {{-- Zn quincenal --}}
                                         <template x-if="metal === 'zn'">
-                                            <x-input prefix="Zn:" type="text" wire:model="NIM" x-model="NIM" suffix="USD/TM" />
+                                            <x-input prefix="Zn:" type="text" x-model="NIM" suffix="USD/TM" />
                                         </template>
-                                        {{-- Pb quincenal --}}
                                         <template x-if="metal === 'pb'">
-                                            <x-input prefix="Pb:" type="text" wire:model="nimPb" x-model="nimPb" suffix="USD/TM" />
+                                            <x-input prefix="Pb:" type="text" x-model="nimPb" suffix="USD/TM" />
                                         </template>
                                     </div>
                                     <div class="w-full sm:w-1/2">
-                                        {{-- Zn mercado --}}
                                         <template x-if="metal === 'zn'">
-                                            <x-input prefix="Zn:" type="text" wire:model="Zn" x-model="Zn" suffix="USD/TM" />
+                                            <x-input prefix="Zn:" type="text" x-model="Zn" suffix="USD/TM" />
                                         </template>
-                                        {{-- Pb mercado --}}
                                         <template x-if="metal === 'pb'">
-                                            <x-input prefix="Pb:" type="text" wire:model="Pb" x-model="Pb" suffix="USD/TM" />
+                                            <x-input prefix="Pb:" type="text" x-model="Pb" suffix="USD/TM" />
                                         </template>
                                     </div>
                                 </div>
                                 <div class="flex flex-col sm:flex-row gap-4">
                                     <div class="w-full sm:w-1/2">
-                                        <x-input prefix="Ag:" type="text" wire:model="agNIM" x-model="agNIM" suffix="USD/OZ" />
+                                        <x-input prefix="Ag:" type="text" x-model="agNIM" suffix="USD/OZ" />
                                     </div>
                                     <div class="w-full sm:w-1/2">
-                                        <x-input prefix="Ag:" type="text" wire:model="AgUSD" x-model="AgUSD" suffix="USD/OZ" />
+                                        <x-input prefix="Ag:" type="text" x-model="AgUSD" suffix="USD/OZ" />
                                     </div>
                                 </div>
                             </div>
@@ -437,85 +273,62 @@
 
                         {{-- Tab 2: Pesos y Leyes --}}
                         <div x-show="tab === 'pesos'" x-transition>
-                            <div class="flex flex-col sm:flex-row gap-4 mb-2">
-                                <div class="w-full sm:w-1/3">
-                                    <h1 class="text-sm font-semibold text-gray-600 dark:text-dark-300">Pesos</h1>
-                                </div>
-                                <div class="w-full sm:w-1/3">
-                                    <h1 class="text-sm font-semibold text-gray-600 dark:text-dark-300">Leyes</h1>
-                                </div>
-                                <div class="w-full sm:w-1/3">
-                                    <h1 class="text-sm font-semibold text-gray-600 dark:text-dark-300">Contenidos</h1>
-                                </div>
-                            </div>
-
                             <div class="flex flex-col sm:flex-row gap-4">
                                 <div class="w-full sm:w-1/3">
                                     <x-input prefix="TMH:" x-model="tmh" type="number" />
                                 </div>
                                 <div class="w-full sm:w-1/3">
-                                    {{-- Zn ley --}}
                                     <template x-if="metal === 'zn'">
                                         <x-input prefix="Zn" suffix="%" x-model="zinc" type="number" />
                                     </template>
-                                    {{-- Pb ley --}}
                                     <template x-if="metal === 'pb'">
                                         <x-input prefix="Pb" suffix="%" x-model="plomo" type="number" />
                                     </template>
                                 </div>
                                 <div class="w-full sm:w-1/3">
-                                    <x-input prefix="As" suffix="%" x-model="As"/>
+                                    <x-input prefix="As" suffix="%" x-model="As" />
                                 </div>
                             </div>
-
                             <div class="flex flex-col sm:flex-row gap-4">
                                 <div class="w-full sm:w-1/3">
                                     <x-input prefix="H2O:" suffix="%" x-model="h2o" type="number" />
                                 </div>
                                 <div class="w-full sm:w-1/3">
-                                    <x-input prefix="Ag" x-bind:value="ag.toFixed(2)" readonly />
-                                </div>
-                                <div class="w-full sm:w-1/3">
-                                    <x-input prefix="Sb" suffix="%" x-model="Sb"/>
-                                </div>
-                            </div>
-
-                            <div class="flex flex-col sm:flex-row gap-4">
-                                <div class="w-full sm:w-1/3">
-                                    <x-input prefix="TMS:" x-bind:value="tms.toFixed(3)" readonly />
-                                </div>
-                                <div class="w-full sm:w-1/3">
-                                    <x-input suffix="Dm" x-model="dm" type="number" />
+                                    <x-input prefix="Sb" suffix="%" x-model="Sb" />
                                 </div>
                                 <div class="w-full sm:w-1/3">
                                     <x-input prefix="Fe" suffix="%" x-model="Fe" />
                                 </div>
                             </div>
-
                             <div class="flex flex-col sm:flex-row gap-4">
+                                <div class="w-full sm:w-1/3">
+                                    <x-input suffix="Dm" x-model="dm" type="number" />
+                                </div>
                                 <div class="w-full sm:w-1/3">
                                     <x-input prefix="MERMA:" suffix="%" x-model="merma" type="number" />
                                 </div>
                                 <div class="w-full sm:w-1/3">
-                                    <x-input prefix="Maquila:" wire:model="maquila" x-model="maquila" />
-                                </div>
-                                <div class="w-full sm:w-1/3">
-                                    <x-input prefix="SiO2" suffix="%" x-model="SiO2"/>
+                                    <x-input prefix="Maquila:" x-model="maquila" />
                                 </div>
                             </div>
-
                             <div class="flex flex-col sm:flex-row gap-4">
                                 <div class="w-full sm:w-1/3">
                                     <x-input prefix="TMNS:" x-bind:value="tmns.toFixed(3)" readonly />
                                 </div>
                                 <div class="w-full sm:w-1/3">
-                                    <x-input prefix="Base:" wire:model="base" x-model="base" />
+                                    <x-input prefix="SiO2" suffix="%" x-model="SiO2"/>
                                 </div>
+                                <div class="w-full sm:w-1/3">
+                                    <x-input prefix="Base:" x-model="base" />
+                                </div>
+                            </div>
+                            <div class="flex flex-col sm:flex-row gap-4">
                                 <div class="w-full sm:w-1/3">
                                     <x-input prefix="Sn" suffix="%" x-model="Sn" />
                                 </div>
+                                <div class="w-full sm:w-1/3"></div>
+                                <div class="w-full sm:w-1/3"></div>
                             </div>
-
                         </div>
 
                         {{-- Tab 3: Deducciones --}}
@@ -575,7 +388,6 @@
                                         <x-input prefix="=" x-bind:value="baseTotal.toFixed(2)" readonly />
                                     </div>
                                 </div>
-                                {{-- Refinacion (Pb only) --}}
                                 <div x-show="metal === 'pb'" class="flex flex-col sm:flex-row gap-2 mt-2">
                                     <div class="w-full sm:w-1/5">
                                         <x-input prefix="Refinacion:" x-model="refinacion" />
@@ -841,14 +653,20 @@
         </div>
         <x-slot:footer>
             <div class="flex justify-end gap-2">
-                <x-button wire:navigate href="{{ route('liquidation.form') }}" text="Cancelar" icon="x-mark"
+                @if ($this->id)
+                    <x-button wire:navigate href="{{ route('liquidation.pdf', $this->id) }}" text="PDF"
+                        icon="arrow-down-tray" color="emerald" outline />
+                @endif
+                <x-button wire:navigate href="{{ route('liquidations') }}" text="Cancelar" icon="x-mark"
                     color="secondary" />
                 @if ($this->id)
-                    <x-button wire:click.prevent="update()" wire:loading.attr="disabled" text="Actualizar"
-                        icon="clipboard-document" color="fuchsia" outline />
+                    <x-button wire:loading.attr="disabled" text="Actualizar"
+                        icon="clipboard-document" color="fuchsia" outline
+                        @click="$wire.call('update', getData())" />
                 @else
-                    <x-button wire:click.prevent="store()" wire:loading.attr="disabled" text="Guardar"
-                        icon="archive-box-arrow-down" color="fuchsia" outline />
+                    <x-button wire:loading.attr="disabled" text="Guardar"
+                        icon="archive-box-arrow-down" color="fuchsia" outline
+                        @click="$wire.call('store', getData())" />
                 @endif
             </div>
         </x-slot:footer>

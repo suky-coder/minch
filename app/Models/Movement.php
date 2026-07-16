@@ -20,6 +20,7 @@ class Movement extends Model
         'amount',
         'number_vol',
         'person_id',
+        'contract_id',
         'user_id',
     ];
 
@@ -51,6 +52,11 @@ class Movement extends Model
     public function person(): BelongsTo
     {
         return $this->belongsTo(Person::class);
+    }
+
+    public function contract(): BelongsTo
+    {
+        return $this->belongsTo(Contract::class);
     }
 
     public function getSupplierAttribute()

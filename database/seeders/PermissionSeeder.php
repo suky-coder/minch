@@ -99,6 +99,13 @@ class PermissionSeeder extends Seeder
             /* ── Cotizaciones ── */
             ['guard_name' => 'web', 'name' => 'Ver cotizaciones', 'description' => 'Puede ver las cotizaciones de minerales'],
 
+            /* ── Contratos ── */
+            ['guard_name' => 'web', 'name' => 'Ver contratos', 'description' => 'Puede ver la lista y detalle de contratos'],
+            ['guard_name' => 'web', 'name' => 'Crear contratos', 'description' => 'Puede crear nuevos contratos'],
+            ['guard_name' => 'web', 'name' => 'Editar contratos', 'description' => 'Puede editar contratos existentes'],
+            ['guard_name' => 'web', 'name' => 'Eliminar contratos', 'description' => 'Puede eliminar contratos'],
+            ['guard_name' => 'web', 'name' => 'PDF contratos', 'description' => 'Puede exportar contratos en formato PDF'],
+
         ];
 
         foreach ($permissions as $permission) {

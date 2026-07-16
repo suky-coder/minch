@@ -273,13 +273,13 @@
                             {{ $account->description }}
                         </td>
                         <td>
-                            {{ $account->type == 'D' ? $account->amount : ($account->type == 'B' ? $account->amount : '') }}
+                            {{ $account->type == 'D' ? number_format((float)$account->amount, 2, ',', '.') : ($account->type == 'B' ? number_format((float)$account->amount, 2, ',', '.') : '') }}
                         </td>
                         <td>
-                            {{ $account->type == 'C' ? $account->amount : '' }}
+                            {{ $account->type == 'C' ? number_format((float)$account->amount, 2, ',', '.') : '' }}
                         </td>
                         <td>
-                            {{ $account->balance }}
+                            {{ number_format((float)$account->balance, 2, ',', '.') }}
                         </td>
                     </tr>
                 @endforeach
@@ -287,10 +287,10 @@
             <tfoot>
                 <tr>
                     <td align="right" colspan="3">total:</td>
-                    <td align="right">{{ $accountBox->whereIn('type', ['D', 'B'])->sum('amount') }} </td>
-                    <td align="right">{{ $accountBox->whereIn('type', ['C'])->sum('amount') }}</td>
+                    <td align="right">{{ number_format((float) $accountBox->whereIn('type', ['D', 'B'])->sum('amount'), 2, ',', '.') }} </td>
+                    <td align="right">{{ number_format((float) $accountBox->whereIn('type', ['C'])->sum('amount'), 2, ',', '.') }}</td>
                     <td align="right">
-                        {{ $accountBox->whereIn('type', ['D', 'B'])->sum('amount') - $accountBox->whereIn('type', ['C'])->sum('amount') }}
+                        {{ number_format((float) ($accountBox->whereIn('type', ['D', 'B'])->sum('amount') - $accountBox->whereIn('type', ['C'])->sum('amount')), 2, ',', '.') }}
                     </td>
                 </tr>
             </tfoot>

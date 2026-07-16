@@ -96,35 +96,7 @@
             <table class="min-w-full divide-y divide-dark-600/20"
                    wire:loading.class="cursor-not-allowed select-none opacity-25">
 
-                {{-- Cabecera info --}}
-                <thead>
-                    <tr class="bg-dark-700/60">
-                        <th scope="col" colspan="4"
-                            class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-dark-300">
-                            <span class="flex items-center gap-2">
-                                <span class="w-1.5 h-1.5 rounded-full bg-primary-400"></span>
-                                CUENTA: {{ $this->account }}
-                            </span>
-                        </th>
-                        <th scope="col" colspan="4"
-                            class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-dark-300">
-                            <span class="flex items-center gap-2">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                                MONEDA: {{ $this->moneda }}
-                            </span>
-                        </th>
-                    </tr>
-                    <tr class="bg-dark-700/30">
-                        <th scope="col" colspan="8"
-                            class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider text-dark-400">
-                            <span class="flex items-center gap-2">
-                                <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
-                                PERIODO: {{ $this->dateT }}
-                            </span>
-                        </th>
-                    </tr>
-
-                    {{-- Cabecera columnas --}}
+                {{-- Cabecera columnas --}}
                     <tr class="bg-dark-700/50">
                         <th scope="col" class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-dark-300">Nº</th>
                         <th scope="col" class="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-dark-300">Fecha</th>
@@ -155,13 +127,13 @@
                                 {{ $transaction->transaction->number_label }}
                             </td>
                             <td class="whitespace-nowrap px-4 py-3.5 text-sm text-right font-mono font-medium text-emerald-300">
-                                {{ $transaction->type == 'D' || $transaction->type == 'B' ? number_format($transaction->amount, 2, '.', ',') : '' }}
+                                {{ $transaction->type == 'D' || $transaction->type == 'B' ? number_format($transaction->amount, 2, ',', '.') : '' }}
                             </td>
                             <td class="whitespace-nowrap px-4 py-3.5 text-sm text-right font-mono font-medium text-red-300">
-                                {{ $transaction->type == 'C' ? number_format($transaction->amount, 2, '.', ',') : '' }}
+                                {{ $transaction->type == 'C' ? number_format($transaction->amount, 2, ',', '.') : '' }}
                             </td>
                             <td class="whitespace-nowrap px-4 py-3.5 text-sm text-right font-mono font-semibold text-primary-300">
-                                {{ number_format($transaction->balance, 2, '.', ',') }}
+                                {{ number_format($transaction->balance, 2, ',', '.') }}
                             </td>
                             <td class="whitespace-nowrap px-4 py-3.5 text-sm text-center text-dark-300">
                                 @if ($transaction->type != 'B')

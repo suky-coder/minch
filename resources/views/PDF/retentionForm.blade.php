@@ -48,7 +48,7 @@
                         </style>
                         <td width="78%" align="right" style="padding:20px 80px 10px 0px"><strong
                                 style="font-size: 18px;  font-weight: bold">Bs.
-                                {{ $retention->calculate_total }}</strong> </td>
+                                {{ number_format((float) $retention->calculate_total, 2, ',', '.') }}</strong> </td>
                         <td align="center" style="font-size:16px; position: relative; vertical-align: top">
                             <div style="position: absolute;right:90px;padding-top:5px">
                                 <strong>Nº {{ $retention->date_code }}</strong>
@@ -95,7 +95,7 @@
                     {{ $discount->taxe->applied_discount }}%
                 </td>
                 <td align="right" style="padding: 8px 100px 8px 8px; border: 0px;">
-                    {{ $discount->amount }}
+                    {{ number_format((float) $discount->amount, 2, ',', '.') }}
                 </td>
             </tr>
         @endforeach
@@ -106,7 +106,7 @@
             </td>
             <td align="right" style="padding: 8px 100px 8px 8px; border: 0px;">
                 <hr>
-                {{ $retention->discounts->sum('amount') }}
+                {{ number_format((float) $retention->discounts->sum('amount'), 2, ',', '.') }}
             </td>
         </tr>
         <tr>
@@ -115,7 +115,7 @@
             </td>
             <td align="right" style="padding: 8px 100px 8px 8px; border: 0px;">
                 <hr>
-                {{ $retention->amount }}
+                {{ number_format((float) $retention->amount, 2, ',', '.') }}
             </td>
         </tr>
     </table>

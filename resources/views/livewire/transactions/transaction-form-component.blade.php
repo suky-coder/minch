@@ -4,8 +4,16 @@
             <span class="font-semibold text-base">Registro de Movimiento</span>
         </x-slot:header>
         <form id="user-create" wire:submit="{{ $this->id ? 'update' : 'store' }}" class="space-y-2" x-on:keydown.cmd.enter="$wire.{{ $this->id ? 'update' : 'store' }}()">
-            <div class="w-full">
-                <livewire:supplier-search :ci="$ci" />
+            <div class="flex flex-col sm:flex-row gap-4">
+                <div class="w-full sm:w-1/3">
+                    <x-select.styled wire:model.live="personType" label="Tipo de persona" :options="[
+                        ['label' => 'Proveedor', 'value' => 'supplier'],
+                        ['label' => 'Cliente', 'value' => 'customer'],
+                    ]" />
+                </div>
+                <div class="w-full sm:w-2/3">
+                    <livewire:supplier-search :ci="$ci" />
+                </div>
             </div>
             <div class="flex flex-col sm:flex-row gap-4">
                 <div class="w-full sm:w-1/2">
@@ -40,7 +48,7 @@
                 <x-textarea wire:model="description" label="Descripción" rows="5" />
             </div>
             <div class="flex flex-col sm:flex-row gap-4 sm:justify-end sm:items-end">
-                <x-button color="outline" type="button" wire:click="clear()" icon="x-mark">
+                <x-button color="outline" type="button" wire:navigate href="{{ route('transactions.view', ['id' => $account_id, 'date' => $date_account]) }}" icon="x-mark">
                     Cancelar
                 </x-button>
                 <x-button color="primary" wire:click="{{ $this->id ? 'update' : 'store' }}" wire:loading.attr="disabled" wire:target="store,update" icon="check">

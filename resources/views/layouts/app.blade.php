@@ -104,7 +104,7 @@
                     
                 <x-side-bar.item text="Dashboard" icon="home" :route="route('dashboard')" wire:navigate />
                 @endcan
-                <x-side-bar.item text="Control de Usuario" icon="shield-check">
+                 <x-side-bar.item text="Control de Usuario" icon="shield-check">
                     @can('Ver usuarios')
                     <x-side-bar.item text="Usuarios" icon="user" :route="route('users')" wire:navigate/>
                     @endcan
@@ -130,11 +130,11 @@
                 @can('Ver cooperativas')
                 <x-side-bar.item text="Cooperativas" icon="building-storefront" :route="route('cooperatives')" wire:navigate />
                 @endcan
-               {{--  @can('Ver cotizaciones')
+               {{--  @can('Ver cotizaciones') --}}
                 <x-side-bar.item text="Cotizaciones" icon="currency-dollar" :route="route('cotizaciones')" wire:navigate />
-                @endcan --}}
+              {{--   @endcan --}}
                 @can('Ver cuentas')
-                <x-side-bar.item text="Cuentas" icon="clipboard-document-check" :route="route('accounts')" wire:navigate />
+                <x-side-bar.item text="Cuentas"  :route="route('accounts')" wire:navigate />
                 @endcan
                 @can('Ver retenciones')
                 <x-side-bar.item text="Retenciones" icon="hand-raised" :route="route('retentions')" wire:navigate />
@@ -150,16 +150,19 @@
                     @can('Ver estados de cuenta')
                     <x-side-bar.item text="Estado de cuenta" icon="document-text" :route="route('accounts.statement')" wire:navigate />
                     @endcan
+                      @can('Ver contratos')
+                    <x-side-bar.item text="Contratos" icon="clipboard-document-check" :route="route('contracts')" wire:navigate />
+                    @endcan
                 </x-side-bar.item>
-{{--                 <x-side-bar.item text="Liquidaciones" icon="calculator" :route="route('liquidation.form')" wire:navigate />
- --}}                @can('Ver reportes')
+                 <x-side-bar.item text="Liquidaciones" icon="calculator" :route="route('liquidations')" wire:navigate />
+              @can('Ver reportes')
                 <x-side-bar.separator line text="Reportes" />
                 <x-side-bar.item text="Reportes" icon="chart-bar">
                     <x-side-bar.item text="Retenciones" icon="document-arrow-down" :route="route('reports.retentions')" wire:navigate />
                     <x-side-bar.item text="Caja" icon="archive-box" :route="route('reports.box')" wire:navigate />
                     <x-side-bar.item text="Banco" icon="book-open" :route="route('reports.bank-book')" wire:navigate />
-{{--                     <x-side-bar.item text="Liquidaciones" icon="calculator" :route="route('reports.liquidations')" wire:navigate />
- --}}                </x-side-bar.item>
+                     <x-side-bar.item text="Liquidaciones" icon="calculator" :route="route('reports.liquidations')" wire:navigate />
+               </x-side-bar.item>
                 @endcan
             </x-side-bar>
         </x-slot:menu>
@@ -167,6 +170,7 @@
             {{ $slot }}
         </div>
     </x-layout>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     @livewireScripts
     
 </body>

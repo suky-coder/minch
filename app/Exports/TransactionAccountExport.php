@@ -54,11 +54,11 @@ class TransactionAccountExport implements FromCollection, ShouldAutoSize, WithEv
                     $drawing->setDescription('Logo');
                     $drawing->setPath($logoPath);
                     $drawing->setCoordinates('A1');
-                    $drawing->setWidth(150);
-                    $drawing->setHeight(60);
+                    $drawing->setWidth(100);
+                    $drawing->setHeight(40);
                     $drawing->setWorksheet($worksheet);
                 }
-                $sheet->getRowDimension(1)->setRowHeight(70);
+                $sheet->getRowDimension(1)->setRowHeight(50);
 
                 $headerRow = 2;
                 $dataStartRow = 4;
@@ -95,6 +95,7 @@ class TransactionAccountExport implements FromCollection, ShouldAutoSize, WithEv
 
                 // Data rows
                 $rowIndex = $dataStartRow + 1;
+                $counter = 1;
                 $totals = ['debe' => 0, 'haber' => 0];
 
                 foreach ($this->transactions as $transaction) {
@@ -109,7 +110,7 @@ class TransactionAccountExport implements FromCollection, ShouldAutoSize, WithEv
                         $totals['haber'] += $haber;
                     }
 
-                    $sheet->setCellValue('A'.$rowIndex, $transaction->id);
+                    $sheet->setCellValue('A'.$rowIndex, $counter);
                     $sheet->setCellValue('B'.$rowIndex, $transaction->date);
                     $sheet->setCellValue('C'.$rowIndex, $transaction->description);
                     $sheet->setCellValue('D'.$rowIndex, $numberLabel);
@@ -126,7 +127,13 @@ class TransactionAccountExport implements FromCollection, ShouldAutoSize, WithEv
                     }
                     $sheet->getStyle('G'.$rowIndex)->getNumberFormat()->setFormatCode('#,##0.00');
 
+                    $counter++;
                     $rowIndex++;
+                }
+
+                // Auto-height for data rows
+                for ($r = $dataStartRow + 1; $r <= $rowIndex - 1; $r++) {
+                    $sheet->getRowDimension($r)->setRowHeight(-1);
                 }
 
                 // Totals row
@@ -161,8 +168,13 @@ class TransactionAccountExport implements FromCollection, ShouldAutoSize, WithEv
                 $sheet->getStyle('F')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
                 $sheet->getStyle('G')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
+                // Text wrap for description column
+                $sheet->getStyle('C')->getAlignment()->setWrapText(true);
+
                 // Column widths
-                $sheet->getColumnDimension('C')->setWidth(40);
+                $sheet->getColumnDimension('A')->setAutoSize(false);
+                $sheet->getColumnDimension('A')->setWidth(2);
+                $sheet->getColumnDimension('C')->setWidth(45);
             },
         ];
     }

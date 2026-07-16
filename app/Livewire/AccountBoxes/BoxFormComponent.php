@@ -2,7 +2,9 @@
 
 namespace App\Livewire\AccountBoxes;
 
+use App\Models\Customer;
 use App\Models\Movement;
+use App\Models\Person;
 use App\Services\CashBalanceService;
 use App\Services\PersonSupplierService;
 use Carbon\Carbon;
@@ -22,6 +24,8 @@ class BoxFormComponent extends Component
     public $description;
 
     public $number_check;
+
+    public $personType = 'supplier';
 
     public $ci;
 
@@ -57,6 +61,9 @@ class BoxFormComponent extends Component
                     $this->full_name = $movement->person->full_name;
                     $this->phone = $movement->person->phone;
                     $this->person_id = $movement->person->id;
+
+                    $movement->person->load(['supplier', 'customer']);
+                    $this->personType = $movement->person->customer ? 'customer' : ($movement->person->supplier ? 'supplier' : $this->personType);
                 }
             }
         }
@@ -79,6 +86,8 @@ class BoxFormComponent extends Component
     {
         $this->ci = $payload['ci'];
         $this->person_id = null;
+        $this->full_name = '';
+        $this->phone = '';
     }
 
     public function onSupplierSelected($payload)
@@ -87,6 +96,11 @@ class BoxFormComponent extends Component
         $this->full_name = $payload['full_name'];
         $this->phone = $payload['phone'];
         $this->person_id = $payload['person_id'];
+
+        $person = Person::with(['supplier', 'customer'])->find($payload['person_id']);
+        if ($person) {
+            $this->personType = $person->customer ? 'customer' : ($person->supplier ? 'supplier' : $this->personType);
+        }
     }
 
     public function store()
@@ -94,6 +108,7 @@ class BoxFormComponent extends Component
         $this->authorize('Crear caja chica');
 
         $this->validate([
+            'personType' => 'required|in:supplier,customer',
             'ci' => 'required|string|max:15',
             'full_name' => 'required|string|max:150',
             'phone' => 'nullable|string|max:15',
@@ -105,18 +120,14 @@ class BoxFormComponent extends Component
         ]);
 
         DB::transaction(function () {
-            $supplier = app(PersonSupplierService::class)->resolve(
-                $this->ci,
-                $this->full_name,
-                $this->phone
-            );
+            $person = $this->resolvePerson();
 
             $movement = Movement::create([
                 'date' => $this->date,
                 'description' => $this->description,
                 'type' => $this->type,
                 'amount' => $this->amount,
-                'person_id' => $supplier->person_id,
+                'person_id' => $person->id,
                 'user_id' => auth()->id(),
             ]);
 
@@ -136,6 +147,7 @@ class BoxFormComponent extends Component
         $this->authorize('Editar caja chica');
 
         $this->validate([
+            'personType' => 'required|in:supplier,customer',
             'ci' => 'required|string|max:15',
             'full_name' => 'required|string|max:150',
             'phone' => 'nullable|string|max:15',
@@ -149,18 +161,14 @@ class BoxFormComponent extends Component
         DB::transaction(function () {
             $movement = Movement::with('person', 'box')->findOrFail($this->id);
 
-            $supplier = app(PersonSupplierService::class)->resolve(
-                $this->ci,
-                $this->full_name,
-                $this->phone
-            );
+            $person = $this->resolvePerson();
 
             $movement->update([
                 'date' => $this->date,
                 'description' => $this->description,
                 'type' => $this->type,
                 'amount' => $this->amount,
-                'person_id' => $supplier->person_id,
+                'person_id' => $person->id,
             ]);
 
             app(CashBalanceService::class)->recalculateFromDate($this->date);
@@ -174,8 +182,39 @@ class BoxFormComponent extends Component
 
     public function clear()
     {
-        $this->reset(['id', 'ci', 'full_name', 'phone', 'amount', 'type', 'date', 'description', 'number_check', 'person_id']);
+        $this->reset(['id', 'ci', 'full_name', 'phone', 'amount', 'type', 'date', 'description', 'number_check', 'person_id', 'personType']);
         $this->resetValidation();
         $this->dispatch('close-modal');
+    }
+
+    private function resolvePerson(): Person
+    {
+        if ($this->personType === 'supplier') {
+            $supplier = app(PersonSupplierService::class)->resolve(
+                $this->ci,
+                $this->full_name,
+                $this->phone
+            );
+
+            return $supplier->person;
+        }
+
+        $person = Person::firstOrCreate(
+            ['ci' => $this->ci],
+            ['full_name' => $this->full_name, 'phone' => $this->phone]
+        );
+
+        if ($person->wasRecentlyCreated === false) {
+            $person->update(array_filter([
+                'full_name' => $this->full_name,
+                'phone' => $this->phone,
+            ]));
+        }
+
+        Customer::firstOrCreate(
+            ['person_id' => $person->id]
+        );
+
+        return $person;
     }
 }

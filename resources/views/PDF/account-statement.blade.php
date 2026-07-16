@@ -281,13 +281,13 @@
                             {{ $account->number_vol }}
                         </td>
                         <td>
-                            {{ in_array($account->type, ['D', 'B']) ? number_format($account->amount, 2, '.', ',') : '' }}
+                            {{ in_array($account->type, ['D', 'B']) ? number_format((float)$account->amount, 2, ',', '.') : '' }}
                         </td>
                         <td>
-                            {{ $account->type == 'C' ? number_format($account->amount, 2, '.', ',') : '' }}
+                            {{ $account->type == 'C' ? number_format((float)$account->amount, 2, ',', '.') : '' }}
                         </td>
                         <td>
-                            {{ number_format($account->balance, 2, '.', ',') }}
+                            {{ number_format((float)$account->balance, 2, ',', '.') }}
                         </td>
                     </tr>
                 @endforeach
@@ -295,10 +295,10 @@
             <tfoot>
                 <tr>
                     <td align="right" colspan="5">total:</td>
-                    <td align="right">{{ $accountStatement->whereIn('type', ['D', 'B'])->sum('amount') }} </td>
-                    <td align="right">{{ $accountStatement->whereIn('type', ['C'])->sum('amount') }}</td>
+                    <td align="right">{{ number_format((float) $accountStatement->whereIn('type', ['D', 'B'])->sum('amount'), 2, ',', '.') }} </td>
+                    <td align="right">{{ number_format((float) $accountStatement->whereIn('type', ['C'])->sum('amount'), 2, ',', '.') }}</td>
                     <td align="right">
-                        {{ $accountStatement->whereIn('type', ['D', 'B'])->sum('amount') - $accountStatement->whereIn('type', ['C'])->sum('amount') }}
+                        {{ number_format((float) ($accountStatement->whereIn('type', ['D', 'B'])->sum('amount') - $accountStatement->whereIn('type', ['C'])->sum('amount')), 2, ',', '.') }}
                     </td>
                 </tr>
             </tfoot>

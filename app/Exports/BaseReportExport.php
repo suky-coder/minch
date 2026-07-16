@@ -28,6 +28,8 @@ abstract class BaseReportExport implements FromCollection, ShouldAutoSize, WithE
 
     protected string $clasificacion = 'PÚBLICO';
 
+    protected bool $narrowFirstColumn = true;
+
     public function __construct(array $data)
     {
         $this->data = $data;
@@ -200,10 +202,11 @@ abstract class BaseReportExport implements FromCollection, ShouldAutoSize, WithE
                     $sheet->setCellValue($cell, $value);
                     $sheet->getStyle($cell)->getNumberFormat()->setFormatCode($numberFormat);
                     $sheet->getStyle($cell)->applyFromArray([
-                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT, 'wrapText' => true],
                     ]);
                 } else {
                     $sheet->setCellValue($cell, $value);
+                    $sheet->getStyle($cell)->getAlignment()->setWrapText(true);
                 }
 
                 $sheet->getStyle($cell)->applyFromArray($borderStyle);
@@ -213,6 +216,7 @@ abstract class BaseReportExport implements FromCollection, ShouldAutoSize, WithE
 
                 $colLetter++;
             }
+            $sheet->getRowDimension($row)->setRowHeight(-1);
             $row++;
         }
 
@@ -244,6 +248,15 @@ abstract class BaseReportExport implements FromCollection, ShouldAutoSize, WithE
         for ($ci = count($totals) + 1; $ci < $lastCol; $ci++) {
             $letter = $this->numToLetter($ci + 1);
             $sheet->getStyle($letter.$row)->applyFromArray($totalStyle);
+        }
+
+        // Column widths
+        if ($this->narrowFirstColumn) {
+            $sheet->getColumnDimension('A')->setAutoSize(false);
+            $sheet->getColumnDimension('A')->setWidth(2);
+            if ($lastCol >= 3) {
+                $sheet->getColumnDimension('C')->setWidth(45);
+            }
         }
     }
 

@@ -12,34 +12,46 @@ use Livewire\Component;
 
 class Dashboard extends Component
 {
+    public $selectedMonth;
+
+    public $selectedYear;
+
+    public function mount()
+    {
+        $now = Carbon::now();
+        $this->selectedMonth = $now->month;
+        $this->selectedYear = $now->year;
+    }
+
     public function render()
     {
         $now = Carbon::now();
-        $monthStart = $now->copy()->startOfMonth();
-        $monthEnd = $now->copy()->endOfMonth();
+        $filterDate = Carbon::createFromDate($this->selectedYear, $this->selectedMonth, 1);
+        $monthStart = $filterDate->copy()->startOfMonth();
+        $monthEnd = $filterDate->copy()->endOfMonth();
 
         // ── KPI Cards ──
         $totalSuppliers = Supplier::count();
         $totalCooperatives = Cooperative::count();
-        $totalMovements = Movement::count();
+        $totalMovements = Movement::whereBetween('date', [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()])->count();
 
-        $retencionesMes = Retention::whereBetween('date', [$monthStart, $monthEnd])->count();
-        $montoRetencionesMes = Retention::whereBetween('date', [$monthStart, $monthEnd])->sum('amount');
+        $retencionesMes = Retention::whereBetween('date', [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()])->count();
+        $montoRetencionesMes = Retention::whereBetween('date', [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()])->sum('amount');
 
-        // Cash balance (Box movements: D + B - C)
-        $boxDebit = Movement::whereHas('box')->whereIn('type', ['D', 'B'])->sum('amount');
-        $boxCredit = Movement::whereHas('box')->where('type', 'C')->sum('amount');
+        // Cash balance (current month)
+        $boxDebit = Movement::whereHas('box')->whereIn('type', ['D', 'B'])->whereBetween('date', [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()])->sum('amount');
+        $boxCredit = Movement::whereHas('box')->where('type', 'C')->whereBetween('date', [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()])->sum('amount');
         $saldoCaja = $boxDebit - $boxCredit;
 
-        // Bank balance (Transaction movements: D + B - C)
-        $bankDebit = Movement::whereHas('transaction')->whereIn('type', ['D', 'B'])->sum('amount');
-        $bankCredit = Movement::whereHas('transaction')->where('type', 'C')->sum('amount');
+        // Bank balance (current month)
+        $bankDebit = Movement::whereHas('transaction')->whereIn('type', ['D', 'B'])->whereBetween('date', [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()])->sum('amount');
+        $bankCredit = Movement::whereHas('transaction')->where('type', 'C')->whereBetween('date', [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()])->sum('amount');
         $saldoBancos = $bankDebit - $bankCredit;
 
-        // ── Monthly movement chart (last 12 months) ──
+        // ── Monthly movement chart (12 months from current date, unfiltered) ──
         $months = collect();
         for ($i = 11; $i >= 0; $i--) {
-            $months->push(Carbon::now()->subMonths($i));
+            $months->push($now->copy()->subMonths($i));
         }
 
         $monthlyData = $months->map(function ($month) {
@@ -59,13 +71,28 @@ class Dashboard extends Component
             'credit' => $monthlyData->pluck('credit')->toArray(),
         ];
 
-        // ── Balance per account ──
-        $accounts = Account::with('movements')->get();
+        // ── Balance per account (B opening + D - C of selected month) ──
+        $accounts = Account::all();
         $balanceByAccount = [];
         foreach ($accounts as $account) {
-            $debit = $account->movements->whereIn('type', ['D', 'B'])->sum('amount');
-            $credit = $account->movements->where('type', 'C')->sum('amount');
-            $balanceByAccount[$account->name] = $debit - $credit;
+            $openingB = $account->movements()
+                ->where('type', 'B')
+                ->where('date', '<=', $monthEnd)
+                ->orderBy('date', 'desc')
+                ->orderBy('movements.id', 'desc')
+                ->first();
+
+            $monthDebe = $account->movements()
+                ->where('type', 'D')
+                ->whereBetween('date', [$monthStart, $monthEnd])
+                ->sum('amount');
+            $monthHaber = $account->movements()
+                ->where('type', 'C')
+                ->whereBetween('date', [$monthStart, $monthEnd])
+                ->sum('amount');
+
+            $label = $account->name . ' (' . $account->account_number . ')';
+            $balanceByAccount[$label] = ($openingB?->amount ?? 0) + $monthDebe - $monthHaber;
         }
 
         $balanceChartData = [
@@ -73,7 +100,7 @@ class Dashboard extends Component
             'series' => array_values($balanceByAccount),
         ];
 
-        // ── Retention pie chart (S vs G amounts this month) ──
+        // ── Retention pie chart (S vs G amounts in selected month) ──
         $retByType = Retention::whereBetween('date', [$monthStart, $monthEnd])
             ->selectRaw('type, SUM(amount) as total')
             ->groupBy('type')
@@ -85,10 +112,10 @@ class Dashboard extends Component
             'colors' => ['#4361EE', '#3A0CA3'],
         ];
 
-        // ── Monthly retention amounts (last 6 months) ──
+        // ── Monthly retention amounts (6 months from current date, unfiltered) ──
         $retMonths = collect();
         for ($i = 5; $i >= 0; $i--) {
-            $retMonths->push(Carbon::now()->subMonths($i));
+            $retMonths->push($now->copy()->subMonths($i));
         }
 
         $retMonthly = $retMonths->map(function ($month) {
@@ -106,17 +133,19 @@ class Dashboard extends Component
             'series' => $retMonthly->pluck('total')->toArray(),
         ];
 
-        // ── Recent movements ──
+        // ── Recent movements (unfiltered) ──
         $recentMovements = Movement::with('person', 'transaction')
             ->latest()
             ->limit(5)
             ->get();
 
-        // ── Recent retentions ──
+        // ── Recent retentions (unfiltered) ──
         $recentRetentions = Retention::with('supplier.person')
             ->latest()
             ->limit(5)
             ->get();
+
+        $this->dispatch('dashboard-updated');
 
         return view('livewire.dashboard', compact(
             'totalSuppliers',

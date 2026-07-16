@@ -33,7 +33,7 @@ class AccountStatementService
     public function movementsForPerson(int $personId): Builder
     {
         return Movement::query()
-            ->with(['box', 'transaction'])
+            ->with(['box', 'transaction', 'contract'])
             ->where('person_id', $personId)
             ->orderBy('date')
             ->orderBy('id')

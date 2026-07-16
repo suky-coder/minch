@@ -82,13 +82,13 @@
                                 {{ $movement->description }}
                             </td>
                             <td class="whitespace-nowrap px-4 py-3.5 text-sm text-right font-mono font-medium text-emerald-300">
-                                {{ $movement->type == 'D' ? number_format($movement->amount, 2, '.', ',') : ($movement->type == 'B' ? number_format($movement->amount, 2, '.', ',') : '') }}
+                                {{ $movement->type == 'D' ? number_format($movement->amount, 2, ',', '.') : ($movement->type == 'B' ? number_format($movement->amount, 2, ',', '.') : '') }}
                             </td>
                             <td class="whitespace-nowrap px-4 py-3.5 text-sm text-right font-mono font-medium text-red-300">
-                                {{ $movement->type == 'C' ? number_format($movement->amount, 2, '.', ',') : '' }}
+                                {{ $movement->type == 'C' ? number_format($movement->amount, 2, ',', '.') : '' }}
                             </td>
                             <td class="whitespace-nowrap px-4 py-3.5 text-sm text-right font-mono font-semibold text-primary-300">
-                                {{ number_format($movement->balance, 2, '.', ',') }}
+                                {{ number_format($movement->balance, 2, ',', '.') }}
                             </td>
                             <td class="whitespace-nowrap px-4 py-3.5 text-sm text-center text-dark-300">
                                 @if ($movement->type != 'B')

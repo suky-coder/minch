@@ -49,9 +49,9 @@ class BoxReportsComponent extends Component
             ->selectRaw('SUM(CASE WHEN type IN ("D", "B") THEN amount ELSE -amount END) OVER (ORDER BY date, id) as balance')
             ->get();
 
-        return $movements->map(function ($m) {
+        return $movements->values()->map(function ($m, $index) {
             return [
-                'number' => $m->type == 'B' ? 'S. INICIAL' : ($m->box?->number_label ?? ''),
+                'number' => $index + 1,
                 'date' => Carbon::parse($m->date)->format('d/m/Y'),
                 'description' => $m->description,
                 'debe' => in_array($m->type, ['D', 'B']) ? (float) $m->amount : 0,

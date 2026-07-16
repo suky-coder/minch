@@ -21,7 +21,7 @@
                     $balance = (float) $row->balance;
                 @endphp
                 <x-badge :color="$balance < 0 ? 'red' : 'emerald'" size="sm">
-                    {{ number_format($balance, 2, '.', ',') }}
+                    {{ number_format($balance, 2, ',', '.') }}
                 </x-badge>
             @endinteract
             @interact('column_action', $row)

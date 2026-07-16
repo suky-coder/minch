@@ -4,9 +4,16 @@
             <span class="font-semibold text-base">Registro de Movimiento de Caja</span>
         </x-slot:header>
         <form id="box-form" wire:submit="{{ $this->id ? 'update' : 'store' }}" class="space-y-2" x-on:keydown.cmd.enter="$wire.{{ $this->id ? 'update' : 'store' }}()">
-            {{-- Buscador de proveedor --}}
-            <div class="w-full">
-                <livewire:supplier-search :ci="$ci" />
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <x-select.styled wire:model.live="personType" label="Tipo de persona" :options="[
+                        ['label' => 'Proveedor', 'value' => 'supplier'],
+                        ['label' => 'Cliente', 'value' => 'customer'],
+                    ]" />
+                </div>
+                <div class="sm:col-span-2">
+                    <livewire:supplier-search :ci="$ci" />
+                </div>
             </div>
 
             {{-- Datos de la persona --}}
@@ -45,7 +52,7 @@
             </div>
 
             <div class="flex flex-col sm:flex-row gap-4 sm:justify-end sm:items-end">
-                <x-button color="outline" type="button" wire:click="clear()" icon="x-mark">
+                <x-button color="outline" type="button" wire:navigate href="{{ route('accounts.box') }}" icon="x-mark">
                     Cancelar
                 </x-button>
                 <x-button color="primary" type="submit" wire:loading.attr="disabled" wire:target="store,update" icon="check">

@@ -7,6 +7,7 @@ class RetentionReportExport extends BaseReportExport
     public function __construct(array $data)
     {
         parent::__construct($data);
+        $this->narrowFirstColumn = false;
         $this->title = 'REPORTE DE RETENCIONES';
         $this->subtitle = '(EXPRESADO EN BOLIVIANOS)';
         $this->columns = [

@@ -175,6 +175,7 @@
             padding: 15px;
             background: #fafcff;
         }
+
     </style>
 </head>
 
@@ -234,13 +235,13 @@
                         </tr>
                         <tr>
                             <td class="etiqueta" style="border-bottom:0px" >Por concepto:</td>
-                            <td class="valor" style="font-size:12px; padding: 2px 0px 0px 0px; vertical-align: top; border-bottom:0px">
-                                    {{ str_pad(Str::limit($transaction->description, 320, '...'), 320, ' .') }}
+                            <td class="valor" style="font-size:12px; padding: 12px 0px 12px 0px; vertical-align: top; border-bottom:0px">
+                                    {{ str_pad(Str::limit($transaction->description, 500, '...'), 500, ' .') }}
                             </td>
                         </tr>
 
                         <tr>
-                            <td colspan="2" align="center" style="padding: 35px 14px;border:0px">
+                            <td colspan="2" align="center" style="padding: 5px 14px;border:0px">
                                 Potosi, {{ $transaction->date_label }}
                             </td>
                         </tr>
@@ -318,13 +319,13 @@
                         </tr>
                         <tr>
                              <td class="etiqueta" style="border-bottom:0px" >Por concepto:</td>
-                            <td class="valor" style="font-size:12px; padding: 2px 0px 0px 0px; vertical-align: top; border-bottom:0px">
-                                    {{ str_pad(Str::limit($transaction->description, 320, '...'), 320, ' .') }}
+                            <td class="valor" style="font-size:12px; padding: 12px 0px 12px 0px; vertical-align: top; border-bottom:0px">
+                                    {{ str_pad(Str::limit($transaction->description, 500, '...'), 500, ' .') }}
                             </td>
                         </tr>
 
                         <tr>
-                            <td colspan="2" align="center" style="padding: 35px 14px;border:0px">
+                            <td colspan="2" align="center" style="padding: 5px 14px;border:0px">
                                 Potosi, {{ $transaction->date_label }}
                             </td>
                         </tr>
@@ -351,58 +352,106 @@
         </div>
     </div>
 
-    <style>
-        /* Estilos base */
-        .check-container {
-            position: relative;
-            width: 180mm;
-            height: 76mm;
-            font-family: 'Arial', sans-serif;
-            font-size: 16px;
-            /* background: red; */
-            /* solo para depuración, luego quitar */
-        }
-
-        /* Posicionamiento con solo left y top en mm */
-        .date {
-            position: absolute;
-            left: 200px;
-            /* ajusta según tu cheque real */
-            top: 22px;
-            padding: 30px 80px 0px 0px;
-            white-space: nowrap;
-            text-align: right;
-            /* alineación izquierda */
-        }
-
-        .pay-to {
-            position: absolute;
-            padding: 40px 0px 0px 150px;
-            left: 10mm;
-            top: 25mm;
-        }
-
-        .amount {
-            position: absolute;
-            left: 10mm;
-            top: 40mm;
-            padding: 20px 0px 0px 50px
-        }
-    </style>
-    <pagebreak sheet-size="180mm 76mm" />
-    <div class="check-container">
-        <div class="date">
-            <span style="margin-right: 20px">Potosí</span>
-            <span style="margin-right: 5px">06</span>
-            <span style="margin-right: 5px">04</span>
-            <span style="margin-right: 5px">2026</span>
-            <span style="margin-right: 15px">200.000</span>
+    @if($transaction->transaction->account->initials == 'BNB.SA')
+    <div style="page-break-before: always; padding:17mm 0 0 0; width:16.7cm;height:5.2cm; margin:0;">
+        <div style="margin-left:13cm; font-size:11px;">
+            {{ number_format($transaction->amount, 2, ',', '.') }}
         </div>
-        <div class="pay-to">{{ $transaction->supplier->full_name }}</div>
-        <div class="amount">
+        <div style="margin-left:1.5cm; margin-top:-1.5mm; font-size:11px;">
+            Potosí, {{ $transaction->date_label }}
+        </div>
+        <div style="margin-left:2cm; margin-top:3mm; font-size:12px;">
+            {{ $transaction->supplier->full_name }}
+        </div>
+        <div style="margin-left:2cm; margin-top:1mm; font-size:11px;">
             {{ $transaction->calculate_label }}
         </div>
     </div>
+    @elseif($transaction->transaction->account->initials == 'BCP.SA')
+    <div style="page-break-before: always; width:16.7cm;height:5.2cm; margin:0; padding:-2mm;">
+        <div style="padding-top:1.3cm; margin-left:6.8cm; font-size:11px;">Potosí</div>
+        <div style="margin-left:10.2cm; margin-top:-0.4cm; font-size:11px;">{{ \Carbon\Carbon::parse($transaction->date)->format('d') }}</div>
+        <div style="margin-left:10.7cm; margin-top:-0.4cm; font-size:11px;">{{ \Carbon\Carbon::parse($transaction->date)->format('m') }}</div>
+        <div style="margin-left:11.3cm; margin-top:-0.4cm; font-size:11px;">{{ \Carbon\Carbon::parse($transaction->date)->format('Y') }}</div>
+        <div style="margin-left:13cm; margin-top:-0.4cm; font-size:11px;">{{ $transaction->transaction->account->currency_type == 'USD' ? '$us.' : 'Bs.' }}{{ number_format($transaction->amount, 2, ',', '.') }}</div>
+        <div style="margin-left:3cm; margin-top:8.9mm; font-size:12px;">
+            {{ $transaction->supplier->full_name }}
+        </div>
+        <div style="margin-left:2.5cm; margin-top:5mm; font-size:11px;">
+            {{ $transaction->calculate_label }}
+        </div>
+    </div>
+    @elseif($transaction->transaction->account->initials == 'BFO.SA')
+    <div style="page-break-before: always; width:16.7cm;height:5.2cm; margin:0; padding:2cm 0 0 0;">
+        <table style="width:16.7cm; border-collapse:collapse; border:none;">
+            <tr>
+                <td style="width:2cm; border:none; padding:0;"></td>
+                <td style="width:2.7cm; border:none; padding:0; font-size:11px;">Potosí</td>
+                <td style="width:1.5cm; border:none; padding:0; font-size:11px;">{{ \Carbon\Carbon::parse($transaction->date)->format('d') }}</td>
+                <td style="width:2.6cm; border:none; padding:0; font-size:11px;">{{ \Carbon\Carbon::parse($transaction->date)->format('m') }}</td>
+                <td style="width:3.2cm; border:none; padding:0; font-size:11px;">{{ \Carbon\Carbon::parse($transaction->date)->format('Y') }}</td>
+                <td style="width:4.7cm; border:none; padding:0; font-size:11px;">{{ $transaction->transaction->account->currency_type == 'USD' ? '$us.' : 'Bs.' }}{{ number_format($transaction->amount, 2, ',', '.') }}</td>
+            </tr>
+        </table>
+        <div style="margin-top:4mm; margin-left:2cm; font-size:12px;">
+            {{ $transaction->supplier->full_name }}
+        </div>
+        <div style="margin-top:5mm; margin-left:2cm; font-size:11px;">
+            {{ $transaction->calculate_label }}
+        </div>
+    </div>
+    @elseif($transaction->transaction->account->initials == 'BGA')
+    <div style="page-break-before: always; width:16.7cm;height:5.2cm; margin:0; padding:1.5cm 0 0 0;">
+        <table style="width:16.7cm; border-collapse:collapse; border:none;">
+            <tr>
+                <td style="width:4.5cm; border:none; padding:0;"></td>
+                <td style="width:3.1cm; border:none; padding:0; font-size:11px;">Potosí</td>
+                <td style="width:0.9cm; border:none; padding:0; font-size:11px;">{{ \Carbon\Carbon::parse($transaction->date)->format('d') }}</td>
+                <td style="width:2.5cm; border:none; padding:0; font-size:11px;">{{ \Carbon\Carbon::parse($transaction->date)->translatedFormat('F') }}</td>
+                <td style="width:1.5cm; border:none; padding:0; font-size:11px;">{{ \Carbon\Carbon::parse($transaction->date)->format('y') }}</td>
+                <td style="width:3.7cm; border:none; padding:0; font-size:11px;">{{ number_format($transaction->amount, 2, ',', '.') }}</td>
+            </tr>
+        </table>
+        <div style="margin-top:4mm; margin-left:4.5cm; font-size:12px;">
+            {{ $transaction->supplier->full_name }}
+        </div>
+        <div style="margin-top:1.5mm; margin-left:4cm; font-size:11px;">
+            {{ $transaction->calculate_label }}
+        </div>
+    </div>
+    @elseif($transaction->transaction->account->initials == 'BUN.SA')
+    <div style="page-break-before: always; width:16.7cm;height:5.2cm; margin:0; padding:0.6cm 0 0 0;">
+        <table style="width:16.7cm; border-collapse:collapse; border:none;">
+            <tr>
+                <td style="width:5.3cm; border:none; padding:0;"></td>
+                <td style="width:7.7cm; border:none; padding:0; font-size:11px;">Potosí, {{ $transaction->date_label }}</td>
+                <td style="width:3.8cm; padding-top:4.5mm; border:none; font-size:11px;"> {{ number_format($transaction->amount, 2, ',', '.') }}</td>
+            </tr>
+        </table>
+        <div style="margin-top:4mm; margin-left:2cm; font-size:12px;">
+            {{ $transaction->supplier->full_name }}
+        </div>
+        <div style="margin-top:1.8mm; margin-left:2.1cm; font-size:11px;">
+            {{ $transaction->calculate_label }}
+        </div>
+    </div>
+    @else
+    <div style="page-break-before: always; padding-top:10px; width:16.7cm;height:5.2cm; margin:0;">
+        <div style="text-align:right; font-size:16px;">
+            <span>Potosí</span>
+            <span style="margin-left:20px">{{ \Carbon\Carbon::parse($transaction->date)->format('d') }}</span>
+            <span style="margin-left:5px">{{ \Carbon\Carbon::parse($transaction->date)->format('m') }}</span>
+            <span style="margin-left:5px">{{ \Carbon\Carbon::parse($transaction->date)->format('Y') }}</span>
+            <span style="margin-left:15px">{{ number_format($transaction->amount, 2, ',', '.') }}</span>
+        </div>
+        <div style="margin-top:5mm; margin-left:10mm; font-size:16px;">
+            {{ $transaction->supplier->full_name }}
+        </div>
+        <div style="margin-top:-2mm; margin-left:10mm; font-size:16px;">
+            {{ $transaction->calculate_label }}
+        </div>
+    </div>
+    @endif
 
 </body>
 

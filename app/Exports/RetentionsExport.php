@@ -53,13 +53,13 @@ class RetentionsExport implements FromCollection, ShouldAutoSize, WithEvents
                     $drawing->setDescription('Logo');
                     $drawing->setPath($logoPath);
                     $drawing->setCoordinates('A1');
-                    $drawing->setWidth(150);
-                    $drawing->setHeight(60);
+                    $drawing->setWidth(100);
+                    $drawing->setHeight(40);
                     $drawing->setWorksheet($worksheet);
                 }
 
                 // Ajustar altura de la fila del logo
-                $sheet->getRowDimension(1)->setRowHeight(70);
+                $sheet->getRowDimension(1)->setRowHeight(50);
 
                 // --- 3. Ahora los encabezados comienzan en la fila 2 (originalmente eran filas 1,2,3) ---
                 // Definimos las filas base (offset +1)
@@ -125,21 +125,24 @@ class RetentionsExport implements FromCollection, ShouldAutoSize, WithEvents
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                 ]);
 
-                // Ancho columna Nombre
-                $sheet->getColumnDimension('C')->setWidth(30);
+                // Text wrap for nombre y apellido column
+                $sheet->getStyle('C')->getAlignment()->setWrapText(true);
 
                 // --- DATOS ---
                 $rowIndex = $dataStartRow;
+                $counter = 1;
                 $totals = array_fill(0, 7 + $totalTaxes + 1, 0);
                 $montoColIndex = 6;
                 $importeColIndex = 7 + $totalTaxes;
                 $descuentoStartIndex = 7;
 
                 foreach ($this->retentions as $retention) {
-                    $dataRow = $this->mapRow($retention);
+                    $dataRow = $this->mapRow($retention, $counter);
                     $colIndex = 1;
                     foreach ($dataRow as $idx => $value) {
-                        $sheet->setCellValue($this->numToLetter($colIndex).$rowIndex, $value);
+                        $cell = $this->numToLetter($colIndex).$rowIndex;
+                        $sheet->setCellValue($cell, $value);
+                        $sheet->getStyle($cell)->getAlignment()->setWrapText(true);
                         if (is_numeric($value)) {
                             if ($idx == $montoColIndex) {
                                 $totals[$montoColIndex] += $value;
@@ -151,6 +154,8 @@ class RetentionsExport implements FromCollection, ShouldAutoSize, WithEvents
                         }
                         $colIndex++;
                     }
+                    $sheet->getRowDimension($rowIndex)->setRowHeight(-1);
+                    $counter++;
                     $rowIndex++;
                 }
 
@@ -177,6 +182,11 @@ class RetentionsExport implements FromCollection, ShouldAutoSize, WithEvents
                     ]);
                 }
 
+                // Column widths
+                $sheet->getColumnDimension('A')->setAutoSize(false);
+                $sheet->getColumnDimension('A')->setWidth(2);
+                $sheet->getColumnDimension('C')->setWidth(45);
+
                 // Bordes a los datos
                 $lastDataRow = $rowIndex - 1;
                 if ($lastDataRow >= $dataStartRow) {
@@ -188,10 +198,10 @@ class RetentionsExport implements FromCollection, ShouldAutoSize, WithEvents
         ];
     }
 
-    private function mapRow($retention): array
+    private function mapRow($retention, int $counter): array
     {
         $row = [
-            $retention->id,
+            $counter,
             $retention->date,
             $retention->supplier->full_name ?? '',
             $retention->code,

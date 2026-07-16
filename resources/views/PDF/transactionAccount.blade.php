@@ -280,13 +280,13 @@
                             {{ $transaction->transaction?->number_label ?? '' }}
                         </td>
                         <td>
-                            {{ $transaction->type == 'D' ? $transaction->amount : ($transaction->type == 'B' ? $transaction->amount : '') }}
+                            {{ $transaction->type == 'D' ? number_format((float)$transaction->amount, 2, ',', '.') : ($transaction->type == 'B' ? number_format((float)$transaction->amount, 2, ',', '.') : '') }}
                         </td>
                         <td>
-                            {{ $transaction->type == 'C' ? $transaction->amount : '' }}
+                            {{ $transaction->type == 'C' ? number_format((float)$transaction->amount, 2, ',', '.') : '' }}
                         </td>
                         <td>
-                            {{ $transaction->balance }}
+                            {{ number_format((float)$transaction->balance, 2, ',', '.') }}
                         </td>
                     </tr>
                 @endforeach
@@ -294,11 +294,11 @@
             <tfoot>
                 <tr>
                     <td align="right" colspan="4"><strong>Total</strong></td>
-                    <td align="right"> <strong>{{ $transactions->whereIn('type', ['D', 'B'])->sum('amount') }}</strong>  </td>
-                    <td align="right"><strong>{{ $transactions->whereIn('type', ['C'])->sum('amount') }}</strong> </td>
+                    <td align="right"> <strong>{{ number_format((float) $transactions->whereIn('type', ['D', 'B'])->sum('amount'), 2, ',', '.') }}</strong>  </td>
+                    <td align="right"><strong>{{ number_format((float) $transactions->whereIn('type', ['C'])->sum('amount'), 2, ',', '.') }}</strong> </td>
                     <td align="right">
                         <strong>
-                            {{ $transactions->whereIn('type', ['D', 'B'])->sum('amount') - $transactions->whereIn('type', ['C'])->sum('amount') }}
+                            {{ number_format((float) ($transactions->whereIn('type', ['D', 'B'])->sum('amount') - $transactions->whereIn('type', ['C'])->sum('amount')), 2, ',', '.') }}
 
                         </strong>
                     </td>

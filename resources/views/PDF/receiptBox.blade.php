@@ -317,7 +317,7 @@
                         <tr>
                              <td class="etiqueta" style="border-bottom:0px" >Por concepto:</td>
                             <td class="valor" style="font-size:12px; padding: 2px 0px 0px 0px; vertical-align: top; border-bottom:0px">
-                                    {{ str_pad(Str::limit($transaction->description, 320, '...'), 320, ' .') }}
+                                    {{ Str::limit($transaction->description, 120, '...') }}
                             </td>
                         </tr>
 

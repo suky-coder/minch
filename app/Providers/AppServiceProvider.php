@@ -5,6 +5,7 @@ namespace App\Providers;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -24,8 +25,8 @@ class AppServiceProvider extends ServiceProvider
         $this->configureTallStackUi();
         $this->configureDefaults();
         if ($this->app->environment('production')) {
-        \Illuminate\Support\Facades\URL::forceScheme('https');
-    }
+            URL::forceScheme('https');
+        }
         require_once app_path('Helpers/NumberHelper.php');
     }
 
