@@ -130,9 +130,9 @@
                 @can('Ver cooperativas')
                 <x-side-bar.item text="Cooperativas" icon="building-storefront" :route="route('cooperatives')" wire:navigate />
                 @endcan
-               {{--  @can('Ver cotizaciones') --}}
+                 @can('Ver cotizaciones') 
                 <x-side-bar.item text="Cotizaciones" icon="currency-dollar" :route="route('cotizaciones')" wire:navigate />
-              {{--   @endcan --}}
+                @endcan 
                 @can('Ver cuentas')
                 <x-side-bar.item text="Cuentas"  :route="route('accounts')" wire:navigate />
                 @endcan
@@ -154,7 +154,10 @@
                     <x-side-bar.item text="Contratos" icon="clipboard-document-check" :route="route('contracts')" wire:navigate />
                     @endcan
                 </x-side-bar.item>
-                 <x-side-bar.item text="Liquidaciones" icon="calculator" :route="route('liquidations')" wire:navigate />
+                @can('Ver liquidaciones')
+                    
+                <x-side-bar.item text="Liquidaciones" icon="calculator" :route="route('liquidations')" wire:navigate />
+                @endcan
               @can('Ver reportes')
                 <x-side-bar.separator line text="Reportes" />
                 <x-side-bar.item text="Reportes" icon="chart-bar">

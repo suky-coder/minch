@@ -114,6 +114,58 @@ These relationships exist in models but are **not backed by database columns**:
 
 All files use `\documentclass[stu]{apa7}` (APA 7th ed. LaTeX). See `docs/RESUMEN-ACTIVIDADES.md` for a 192-line summary.
 
+## Session context (Jul 2026)
+
+### Check overlays (PDF receipts)
+
+`resources/views/PDF/receipt.blade.php` — check overlay templates per bank by `account->initials`:
+
+| Bank | Initials | Approach |
+|---|---|---|
+| BNB | `BNB.SA` | Block divs with `margin-left` + `margin-top` (negative for same-line fields) |
+| BCP | `BCP.SA` | Block divs with negative `margin-top` for same-Y fields |
+| BFO | `BFO.SA` | `<table>` with exact cm column widths + block divs below |
+| BGA | `BGA` | `<table>` with exact cm column widths + block divs below |
+| BUN | `BUN.SA` | `<table>` with exact cm column widths + block divs below |
+| Fallback | `@else` | Generic layout with `<span>` pixel margins |
+
+**mPDF positioning rules** (discovered through testing):
+- `position:absolute` inside `position:relative` — does NOT work reliably
+- `display:inline-block` with fixed widths — works but has whitespace gaps
+- Negative `margin-top` on block divs — works for stacking same-Y fields, but each subsequent field needs a larger negative margin (cumulative)
+- `<table>` with exact cm column widths — reliable for same-line fields
+- `border="1"` attribute may not render; use inline `border:1px solid #000` + `border-collapse:collapse`
+
+Check dimensions: 16.7cm × 5.2cm, on Letter page with no margins.
+
+### PDF files
+
+| File | Description |
+|---|---|
+| `receipt.blade.php` | Check overlay (cheque) per bank |
+| `liquidation.blade.php` | Mineral liquidation document (header table + data table + signatures) |
+| `contract.blade.php` | Contract document |
+| `retentionForm.blade.php` | Retention receipt form |
+
+### Liquidations feature
+
+New feature (under development). Files:
+- `app/Models/Liquidation.php` — model
+- `app/Livewire/Liquidations/LiquidationForm.php` — form component
+- `app/Livewire/Liquidations/LiquidationComponent.php` — list component
+- `resources/views/PDF/liquidation.blade.php` — PDF generation with 8-column data table
+- `database/migrations/2026_07_14_000001_create_liquidations_table.php` — migration
+
+### Contracts feature
+
+Files:
+- `app/Models/Contract.php` — model
+- `app/Livewire/Contracts/` — Livewire components
+- `resources/views/PDF/contract.blade.php` — PDF
+- `database/migrations/2026_04_03_193043_create_contracts_table.php` — migration
+
+Sidebar menu in `resources/views/layouts/app.blade.php` (permission: `Ver contratos`).
+
 ### Agents
 
 | File | Purpose |
